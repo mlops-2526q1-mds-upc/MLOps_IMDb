@@ -1,0 +1,20 @@
+name: policy
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  branch-name:
+    name: branch-name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          # Extract PR head ref and validate pattern
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch: $BRANCH"
+          if [[ ! "$BRANCH" =~ ^(feature|fix|chore|docs|experiment)\/[a-z0-9._-]+$ ]]; then
+            echo "Invalid branch name. Use feature|fix|chore|docs|experiment/<short-topic>"
+            exit 1
+          fi
