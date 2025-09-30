@@ -3,6 +3,7 @@ from pathlib import Path
 from loguru import logger
 from tqdm import tqdm
 import typer
+from codecarbon import track_emissions
 
 from mlops_imdb.config import MODELS_DIR, PROCESSED_DATA_DIR
 
@@ -10,6 +11,7 @@ app = typer.Typer()
 
 
 @app.command()
+@track_emissions
 def main(
     # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
     features_path: Path = PROCESSED_DATA_DIR / "test_features.csv",
