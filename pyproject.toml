@@ -49,8 +49,7 @@ force-sort-within-sections = true
 
 [dependency-groups]
 dev = [
-    "black>=25.9.0",
-    "pylint>=3.3.8",
-    "pytest>=8.4.2",
+    "pre-commit>=4.3.0",
+    "ruff>=0.7.0",  # or latest stable
 ]
 
