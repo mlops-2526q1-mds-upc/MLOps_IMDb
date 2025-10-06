@@ -116,3 +116,34 @@ stages:
       hash: md5
       md5: b3428f423740594b2e47ddceb2ba24c2
       size: 80891
+  eval:
+    cmd: python src/modeling/eval.py
+    deps:
+    - path: data/processed/test_features.npz
+      hash: md5
+      md5: 75e78dd124c934331a5ea26f6a631373
+      size: 40229579
+    - path: models/model.pkl
+      hash: md5
+      md5: b3428f423740594b2e47ddceb2ba24c2
+      size: 80891
+    - path: src/modeling/eval.py
+      hash: md5
+      md5: f0a04a71db963ab9e51b512dd26cb031
+      size: 3231
+    params:
+      params.yaml:
+        eval:
+          metrics:
+          - accuracy
+          - precision
+          - recall
+          - f1
+          outputs:
+            metrics_json: reports/metrics.json
+            confusion_matrix_png: reports/figures/baseline_confusion_matrix.png
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 9904eff81e43e8e8fac7125326dc2224
+      size: 418
