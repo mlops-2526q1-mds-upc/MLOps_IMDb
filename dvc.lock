@@ -1,0 +1,50 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/data/prepare.py
+    deps:
+    - path: data/raw/imdb_test.csv
+      hash: md5
+      md5: 90b9367c418d3ca633671eef1d0aff5f
+      size: 32565148
+    - path: data/raw/imdb_train.csv
+      hash: md5
+      md5: 62acf68c544d136cc6675df497b6a01f
+      size: 33347168
+    - path: src/data/prepare.py
+      hash: md5
+      md5: 49742a437f424de3a23e9aae161a6a0e
+      size: 1946
+    params:
+      params.yaml:
+        data:
+          raw:
+            train: data/raw/imdb_train.csv
+            test: data/raw/imdb_test.csv
+          processed:
+            train: data/processed/train_clean.csv
+            test: data/processed/test_clean.csv
+          split_info: data/split_info.json
+          schema:
+            text_col: text
+            label_col: label
+            label_domain:
+            - 0
+            - 1
+          split:
+            strategy: fixed_from_split_info
+            train_ratio: 0.5
+        preprocessing:
+          lowercase: true
+          remove_html_tags: true
+          normalize_whitespace: true
+        random_seed: 42
+    outs:
+    - path: data/processed/test_clean.csv
+      hash: md5
+      md5: 8145836ead885f282084a18a123ca148
+      size: 32006125
+    - path: data/processed/train_clean.csv
+      hash: md5
+      md5: f69bc445206bd459cb661b0c26cce5b9
+      size: 32778301
