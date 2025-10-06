@@ -48,3 +48,46 @@ stages:
       hash: md5
       md5: f69bc445206bd459cb661b0c26cce5b9
       size: 32778301
+  features:
+    cmd: python src/features/build_features.py
+    deps:
+    - path: data/processed/test_clean.csv
+      hash: md5
+      md5: 8145836ead885f282084a18a123ca148
+      size: 32006125
+    - path: data/processed/train_clean.csv
+      hash: md5
+      md5: f69bc445206bd459cb661b0c26cce5b9
+      size: 32778301
+    - path: src/features/build_features.py
+      hash: md5
+      md5: a6e495544fae15c5c3c11da16dc3ff67
+      size: 2316
+    params:
+      params.yaml:
+        features:
+          vectorizer: tfidf
+          tfidf:
+            max_features: 10000
+            ngram_range:
+            - 1
+            - 2
+            min_df: 2
+            max_df: 0.95
+          outputs:
+            train_features: data/processed/train_features.npz
+            test_features: data/processed/test_features.npz
+            vectorizer_path: models/tfidf_vectorizer.pkl
+    outs:
+    - path: data/processed/test_features.npz
+      hash: md5
+      md5: 75e78dd124c934331a5ea26f6a631373
+      size: 40229579
+    - path: data/processed/train_features.npz
+      hash: md5
+      md5: ee7ac54a11e33304eeb87ad67f487dbc
+      size: 42017446
+    - path: models/tfidf_vectorizer.pkl
+      hash: md5
+      md5: 63f3d6dce7c71337a340a34c4bc8ee6b
+      size: 377534
