@@ -91,3 +91,28 @@ stages:
       hash: md5
       md5: 63f3d6dce7c71337a340a34c4bc8ee6b
       size: 377534
+  train:
+    cmd: python src/modeling/train.py
+    deps:
+    - path: data/processed/train_features.npz
+      hash: md5
+      md5: ee7ac54a11e33304eeb87ad67f487dbc
+      size: 42017446
+    - path: src/modeling/train.py
+      hash: md5
+      md5: 6717ac7a98424414a09d6a3d750b44f0
+      size: 1597
+    params:
+      params.yaml:
+        train:
+          model_type: logistic_regression
+          logreg:
+            max_iter: 1000
+            random_state: 42
+          outputs:
+            model_path: models/model.pkl
+    outs:
+    - path: models/model.pkl
+      hash: md5
+      md5: b3428f423740594b2e47ddceb2ba24c2
+      size: 80891
