@@ -1,5 +1,8 @@
 # Data
-/data/
+/data/*
+!/data/*.dvc
+!/data/**/*.dvc
+!/data/.gitignore
 
 # Mac OS-specific storage files
 .DS_Store
