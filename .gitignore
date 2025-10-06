@@ -2,6 +2,8 @@
 /data/*
 !/data/*.dvc
 !/data/**/*.dvc
+!/data/split_info.json
+
 !/data/.gitignore
 
 # Mac OS-specific storage files
@@ -194,3 +196,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Notebooks
+notebooks/*.html
+notebooks/*.pdf

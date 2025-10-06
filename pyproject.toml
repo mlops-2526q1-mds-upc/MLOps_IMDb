@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "codecarbon>=3.0.5",
+    "datasets",
     "ipython",
     "jupyterlab",
     "loguru",
@@ -29,6 +30,7 @@ dependencies = [
     "python-dotenv",
     "ruff",
     "scikit-learn",
+    "seaborn",
     "tqdm",
     "typer",
 ]
