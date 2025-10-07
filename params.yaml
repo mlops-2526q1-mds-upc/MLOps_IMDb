@@ -67,10 +67,12 @@ qa:
     allow_null_texts: false
     allow_null_labels: false
 
+# TODO
 mlflow:
   experiment_name: imdb_sentiment_analysis
   tracking_uri: "file:mlruns"
 
+# TODO
 energy:
   codecarbon:
     enabled: true
