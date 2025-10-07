@@ -80,6 +80,21 @@ data: requirements
 	$(PYTHON_INTERPRETER) mlops_imdb/dataset.py
 
 
+## Train model and log to MLflow (DagsHub)
+.PHONY: train
+train:
+	$(PYTHON_INTERPRETER) -m mlops_imdb.modeling.train
+
+## Run inference with the saved local model
+.PHONY: predict
+predict:
+	$(PYTHON_INTERPRETER) -m mlops_imdb.modeling.predict
+
+## (Optional) Launch local MLflow UI (useful if not using DagsHub UI)
+.PHONY: mlflow_ui
+mlflow_ui:
+	mlflow ui --port 5000
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
