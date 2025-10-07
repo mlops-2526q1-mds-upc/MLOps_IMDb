@@ -1,5 +1,9 @@
 # Data
-/data/
+/data/*
+!/data/*.dvc
+!/data/**/*.dvc
+!/data/split_info.json
+!/data/.gitignore
 
 # Mac OS-specific storage files
 .DS_Store
@@ -153,6 +157,8 @@ ENV/
 env.bak/
 venv.bak/
 
+uv.lock
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -189,3 +195,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Notebooks
+notebooks/*.html
+notebooks/*.pdf
+
+# Models
+*.pkl

@@ -1,0 +1,84 @@
+# MLOps IMDb Sentiment Analysis - Pipeline Parameters
+random_seed: 42
+
+data:
+  raw:
+    train: data/raw/imdb_train.csv
+    test: data/raw/imdb_test.csv
+  processed:
+    train: data/processed/train_clean.csv
+    test: data/processed/test_clean.csv
+  split_info: data/split_info.json
+  schema:
+    text_col: text
+    label_col: label
+    label_domain: [0, 1]
+  split:
+    strategy: fixed_from_split_info   
+    train_ratio: 0.5                  
+
+preprocessing:
+  lowercase: true
+  remove_html_tags: true
+  normalize_whitespace: true
+  # No stemming/lemmatization/stopwords (deferred)
+
+features:
+  vectorizer: tfidf
+  tfidf:
+    max_features: 10000
+    ngram_range: [1, 2]
+    min_df: 2
+    max_df: 0.95
+  outputs:
+    train_features: data/processed/train_features.npz
+    test_features: data/processed/test_features.npz
+    vectorizer_path: models/tfidf_vectorizer.pkl
+
+train:
+  model_type: logistic_regression
+  logreg:
+    max_iter: 1000
+    random_state: 42
+  outputs:
+    model_path: models/model.pkl
+
+eval:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+  outputs:
+    metrics_json: reports/metrics.json
+    confusion_matrix_png: reports/figures/baseline_confusion_matrix.png  
+
+predict:
+  outputs:
+    predictions_path: data/processed/test_predictions.csv
+
+qa:
+  thresholds:
+    min_accuracy: 0.85
+    min_f1: 0.85
+  baseline_reference: reports/baseline_metrics.json
+  data_checks:
+    enforce_schema: true
+    allow_null_texts: false
+    allow_null_labels: false
+
+mlflow:
+  experiment_name: imdb_sentiment_analysis
+  tracking_uri: "file:mlruns"
+
+energy:
+  codecarbon:
+    enabled: true
+    output: reports/codecarbon_emissions.csv
+
+stages:
+  prepare: true
+  features: true
+  train: true
+  eval: true
+  predict: false

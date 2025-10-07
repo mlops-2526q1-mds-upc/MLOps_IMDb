@@ -1,0 +1,10 @@
+{
+  "train_size": 25000,
+  "test_size": 25000,
+  "train_positive": 12500,
+  "train_negative": 12500,
+  "test_positive": 12500,
+  "test_negative": 12500,
+  "random_seed": 42,
+  "source": "huggingface/imdb"
+}
