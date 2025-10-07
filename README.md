@@ -6,6 +6,97 @@
 
 Film review sentiment analysis.
 
+## Setup Instructions
+
+Follow these steps to set up the project environment and run the complete pipeline:
+
+### Prerequisites
+
+- Python 3.12
+- [uv](https://docs.astral.sh/uv/) package manager
+- [DVC](https://dvc.org/) for data versioning and pipeline management
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd MLOps_IMDb
+   ```
+
+2. **Create and activate virtual environment**
+   ```bash
+   make create_environment
+   source ./.venv/bin/activate  # On Unix/macOS
+   # or
+   .\.venv\Scripts\activate     # On Windows
+   ```
+
+3. **Install dependencies**
+   ```bash
+   make requirements
+   # or directly with uv
+   uv sync
+   ```
+
+4. **Download the IMDB dataset**
+   ```bash
+   python scripts/download_imdb.py
+   ```
+
+5. **Run the complete DVC pipeline**
+   ```bash
+   dvc repro
+   ```
+
+This will execute all pipeline stages in order:
+- **prepare**: Clean and preprocess the raw IMDB data
+- **features**: Build TF-IDF features from the cleaned text
+- **train**: Train the sentiment analysis model
+- **eval**: Evaluate the model and generate metrics
+
+### Alternative: Run individual stages
+
+You can also run individual pipeline stages:
+
+```bash
+# Data preparation
+dvc repro prepare
+
+# Feature engineering
+dvc repro features
+
+# Model training
+dvc repro train
+
+# Model evaluation
+dvc repro eval
+```
+
+### Verify Setup
+
+After running the pipeline, you should see:
+- Processed data in `data/processed/`
+- Trained models in `models/`
+- Evaluation metrics in `reports/metrics.json`
+- Visualization plots in `reports/figures/`
+
+### Development Commands
+
+```bash
+# Run tests
+make test
+
+# Format code
+make format
+
+# Lint code
+make lint
+
+# Clean compiled files
+make clean
+```
+
 ## Project Organization
 
 ```
