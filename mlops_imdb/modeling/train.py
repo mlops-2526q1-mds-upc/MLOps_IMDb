@@ -1,15 +1,17 @@
 # src/modeling/train.py
 # Purpose: train a Logistic Regression model on sparse TF-IDF features.
 
-import yaml
+import joblib
 import pandas as pd
 import scipy.sparse as sp
-import joblib
 from sklearn.linear_model import LogisticRegression
+import yaml
+
 
 def load_params(path: str = "params.yaml") -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
 
 def main():
     # Load configuration
@@ -20,7 +22,9 @@ def main():
 
     train_cfg = params["train"]
     logreg_cfg = train_cfg["logreg"]
-    outputs = train_cfg["outputs"] if "outputs" in train_cfg else {"model_path": "models/model.pkl"}
+    outputs = (
+        train_cfg["outputs"] if "outputs" in train_cfg else {"model_path": "models/model.pkl"}
+    )
 
     # Inputs
     X_train_path = params["features"]["outputs"]["train_features"]
@@ -37,7 +41,7 @@ def main():
     model = LogisticRegression(
         max_iter=logreg_cfg.get("max_iter", 1000),
         random_state=logreg_cfg.get("random_state", 42),
-        solver="liblinear",          # supports sparse; good for binary TF-IDF
+        solver="liblinear",  # supports sparse; good for binary TF-IDF
         penalty="l2",
     )
 
@@ -47,6 +51,7 @@ def main():
     # Persist model
     joblib.dump(model, model_path)
     print(f"[train] Saved model -> {model_path}")
+
 
 if __name__ == "__main__":
     main()

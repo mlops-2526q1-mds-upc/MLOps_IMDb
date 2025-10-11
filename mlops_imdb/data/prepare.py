@@ -3,12 +3,15 @@
 
 import os
 import re
+
 import pandas as pd
 import yaml
+
 
 def load_params(path: str = "params.yaml") -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
 
 def clean_text(text: str, cfg: dict) -> str:
     # Ensure string
@@ -20,6 +23,7 @@ def clean_text(text: str, cfg: dict) -> str:
     if cfg.get("normalize_whitespace", True):
         text = re.sub(r"\s+", " ", text).strip()
     return text
+
 
 def main():
     params = load_params()
@@ -41,13 +45,15 @@ def main():
     df_test = pd.read_csv(raw_test)
 
     # Basic schema validation
-    missing_cols = [c for c in (text_col, label_col) if c not in df_train.columns or c not in df_test.columns]
+    missing_cols = [
+        c for c in (text_col, label_col) if c not in df_train.columns or c not in df_test.columns
+    ]
     if missing_cols:
         raise ValueError(f"Missing required columns in input CSVs: {missing_cols}")
 
     # Clean
     df_train[text_col] = df_train[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
-    df_test[text_col]  = df_test[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
+    df_test[text_col] = df_test[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
 
     # Write
     df_train.to_csv(out_train, index=False)
@@ -55,6 +61,7 @@ def main():
 
     print(f"[prepare] Saved: {out_train}")
     print(f"[prepare] Saved: {out_test}")
+
 
 if __name__ == "__main__":
     main()

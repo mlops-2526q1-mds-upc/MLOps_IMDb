@@ -2,16 +2,19 @@
 # Purpose: build TF-IDF features for train and test sets based on cleaned text data.
 
 import os
-import yaml
+
+import joblib
 import pandas as pd
 import scipy.sparse as sp
-import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
+import yaml
+
 
 def load_params(path: str = "params.yaml") -> dict:
     """Load parameters from params.yaml."""
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
 
 def main():
     # Load configuration
@@ -65,6 +68,7 @@ def main():
     print(f"[features] Saved test features  -> {out_test}")
     print(f"[features] Saved TF-IDF vectorizer -> {vectorizer_path}")
     print("[features] Done.")
+
 
 if __name__ == "__main__":
     main()
