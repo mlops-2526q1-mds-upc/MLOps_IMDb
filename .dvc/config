@@ -1,0 +1,4 @@
+[core]
+    remote = localstore
+['remote "localstore"']
+    url = C:\Users\Utilisateur\Documents\MIRI-AC\Sem-3\MLOPS\dvc_storage

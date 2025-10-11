@@ -16,6 +16,9 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 dependencies = [
+    "codecarbon>=3.0.5",
+    "datasets",
+    "dvc",
     "ipython",
     "jupyterlab",
     "loguru",
@@ -28,6 +31,7 @@ dependencies = [
     "python-dotenv",
     "ruff",
     "scikit-learn",
+    "seaborn",
     "tqdm",
     "typer",
 ]
@@ -45,4 +49,10 @@ extend-select = ["I"]  # Add import sorting
 [tool.ruff.lint.isort]
 known-first-party = ["mlops_imdb"]
 force-sort-within-sections = true
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "ruff>=0.7.0",  # or latest stable
+]
 

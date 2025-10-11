@@ -1,0 +1,25 @@
+{
+  "accuracy": 0.89428,
+  "precision": 0.8906237615915036,
+  "recall": 0.89896,
+  "f1": 0.8947724648644344,
+  "labels": [
+    0,
+    1
+  ],
+  "confusion_matrix": [
+    [
+      11120,
+      1380
+    ],
+    [
+      1263,
+      11237
+    ]
+  ],
+  "inputs": {
+    "X_test": "data/processed/test_features.npz",
+    "y_test_csv": "data/processed/test_clean.csv",
+    "model": "models/model.pkl"
+  }
+}
