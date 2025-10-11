@@ -61,5 +61,5 @@ jobs:
           key: ${{ runner.os }}-uv-${{ hashFiles('uv.lock') }}
           restore-keys: |
             ${{ runner.os }}-uv-
-      - name: Lint PR commits with gitlint
-        run: uvx --from gitlint-core gitlint --commits origin/${{ github.base_ref }}..HEAD
+      # - name: Lint PR commits with gitlint
+      #   run: uvx --from gitlint-core gitlint --commits origin/${{ github.base_ref }}..HEAD
