@@ -1,5 +1,7 @@
+import os
+
 from datasets import load_dataset
-import pandas as pd, os
+import pandas as pd
 
 ds = load_dataset("imdb")
 os.makedirs("data/raw", exist_ok=True)
