@@ -41,7 +41,7 @@ Follow these steps to set up the project environment and run the complete pipeli
 
 4. **Download the IMDB dataset**
    ```bash
-   python scripts/download_imdb.py
+   python mlops_imdb/data/download_imdb.py
    ```
 
 5. **Run the complete DVC pipeline**
