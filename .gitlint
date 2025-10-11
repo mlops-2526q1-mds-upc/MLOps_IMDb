@@ -1,5 +1,5 @@
 [general]
 contrib = contrib-title-conventional-commits
 
-[title-conventional-commits]
+[contrib-title-conventional-commits]
 types = feat, fix, docs, chore, test, refactor, perf, build, ci, style, revert

@@ -62,4 +62,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-uv-
       - name: Lint PR commits with gitlint
-        run: uvx gitlint[contrib] --commits origin/${{ github.base_ref }}..HEAD
+        run: uvx --from gitlint-core gitlint --commits origin/${{ github.base_ref }}..HEAD
