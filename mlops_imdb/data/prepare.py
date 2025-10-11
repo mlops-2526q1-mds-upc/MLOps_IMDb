@@ -1,6 +1,7 @@
 # src/data/prepare.py
 # Purpose: read raw IMDb CSVs, apply minimal cleaning, write processed CSVs.
 
+import html
 import os
 import re
 
@@ -20,6 +21,8 @@ def clean_text(text: str, cfg: dict) -> str:
         text = text.lower()
     if cfg.get("remove_html_tags", True):
         text = re.sub(r"<[^>]+>", " ", text)
+    if cfg.get("decode_html_entities", True):
+        text = html.unescape(text)
     if cfg.get("normalize_whitespace", True):
         text = re.sub(r"\s+", " ", text).strip()
         # Collapse whitespace introduced before strong punctuation (e.g. from removed HTML tags).

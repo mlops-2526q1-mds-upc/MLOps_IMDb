@@ -8,7 +8,7 @@ def test_clean_text_applies_preprocessing():
     cfg = {"lowercase": True, "remove_html_tags": True, "normalize_whitespace": True}
     raw = "  Some <b>HTML</b>\nText&nbsp; "
     cleaned = prepare.clean_text(raw, cfg)
-    assert cleaned == "some html text&nbsp;"
+    assert cleaned == "some html text"
 
 
 def test_clean_text_respects_disabled_flags():
@@ -16,6 +16,18 @@ def test_clean_text_respects_disabled_flags():
     raw = " MIXED Case <b>tag</b>\n"
     cleaned = prepare.clean_text(raw, cfg)
     # clean_text always casts to str but should not otherwise modify text
+    assert cleaned == raw
+
+
+def test_clean_text_can_skip_entity_decoding():
+    cfg = {
+        "lowercase": False,
+        "remove_html_tags": False,
+        "normalize_whitespace": False,
+        "decode_html_entities": False,
+    }
+    raw = "Value&nbsp;Test"
+    cleaned = prepare.clean_text(raw, cfg)
     assert cleaned == raw
 
 
