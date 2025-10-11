@@ -24,9 +24,15 @@ def test_download_imdb_saves_expected_files(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     module_name = "mlops_imdb.data.download_imdb"
-    sys.modules.pop(module_name, None)
-
-    runpy.run_module(module_name)
+    original_module = sys.modules.get(module_name)
+    try:
+        sys.modules.pop(module_name, None)
+        runpy.run_module(module_name)
+    finally:
+        if original_module is not None:
+            sys.modules[module_name] = original_module
+        else:
+            sys.modules.pop(module_name, None)
 
     train_path = Path("data/raw/imdb_train.csv")
     test_path = Path("data/raw/imdb_test.csv")
