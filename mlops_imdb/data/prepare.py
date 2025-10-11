@@ -22,6 +22,8 @@ def clean_text(text: str, cfg: dict) -> str:
         text = re.sub(r"<[^>]+>", " ", text)
     if cfg.get("normalize_whitespace", True):
         text = re.sub(r"\s+", " ", text).strip()
+        # Collapse whitespace introduced before strong punctuation (e.g. from removed HTML tags).
+        text = re.sub(r"\s+([?!])", r"\1", text)
     return text
 
 
