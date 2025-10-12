@@ -1,6 +1,9 @@
 # src/modeling/train.py
 # Purpose: train a Logistic Regression model on sparse TF-IDF features.
 
+from contextlib import nullcontext
+import os
+
 from codecarbon import EmissionsTracker
 import joblib
 import pandas as pd
@@ -14,10 +17,25 @@ def load_params(path: str = "params.yaml") -> dict:
         return yaml.safe_load(f)
 
 
+def create_tracker(params: dict, project_name: str):
+    energy_cfg = params.get("energy", {}).get("codecarbon", {})
+    if not energy_cfg.get("enabled"):
+        return nullcontext()
+    output_path = energy_cfg.get("output", "emissions.csv")
+    output_dir, output_file = os.path.split(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    else:
+        output_dir = "."
+    return EmissionsTracker(
+        project_name=project_name, output_dir=output_dir, output_file=output_file
+    )
+
+
 def main():
-    with EmissionsTracker(project_name="train_model") as tracker:
-        # Load configuration
-        params = load_params()
+    # Load configuration
+    params = load_params()
+    with create_tracker(params, "train_model") as tracker:
         data_cfg = params["data"]
         schema = data_cfg.get("schema", {"text_col": "text", "label_col": "label"})
         label_col = schema["label_col"]

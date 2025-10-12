@@ -1,6 +1,7 @@
 # src/modeling/eval.py
 # Purpose: evaluate the trained model on test features and write metrics JSON (+ confusion matrix PNG).
 
+from contextlib import nullcontext
 import json
 import os
 
@@ -9,13 +10,32 @@ import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 import scipy.sparse as sp
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_recall_fscore_support
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    precision_recall_fscore_support,
+)
 import yaml
 
 
 def load_params(path: str = "params.yaml") -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def create_tracker(params: dict, project_name: str):
+    energy_cfg = params.get("energy", {}).get("codecarbon", {})
+    if not energy_cfg.get("enabled"):
+        return nullcontext()
+    output_path = energy_cfg.get("output", "emissions.csv")
+    output_dir, output_file = os.path.split(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    else:
+        output_dir = "."
+    return EmissionsTracker(
+        project_name=project_name, output_dir=output_dir, output_file=output_file
+    )
 
 
 def ensure_dir(path: str) -> None:
@@ -40,9 +60,8 @@ def save_confusion_matrix_png(cm, out_path: str, labels=(0, 1)) -> None:
 
 
 def main():
-    with EmissionsTracker(project_name="evaluate_model") as tracker:
-        params = load_params()
-
+    params = load_params()
+    with create_tracker(params, "evaluate_model") as tracker:
         # Paths and schema
         data_cfg = params["data"]
         schema = data_cfg.get(
