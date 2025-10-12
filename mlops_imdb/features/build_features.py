@@ -1,6 +1,7 @@
 # src/features/build_features.py
 # Purpose: build TF-IDF features for train and test sets based on cleaned text data.
 
+from contextlib import nullcontext
 import os
 
 from codecarbon import EmissionsTracker
@@ -17,10 +18,25 @@ def load_params(path: str = "params.yaml") -> dict:
         return yaml.safe_load(f)
 
 
+def create_tracker(params: dict, project_name: str):
+    energy_cfg = params.get("energy", {}).get("codecarbon", {})
+    if not energy_cfg.get("enabled"):
+        return nullcontext()
+    output_path = energy_cfg.get("output", "emissions.csv")
+    output_dir, output_file = os.path.split(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    else:
+        output_dir = "."
+    return EmissionsTracker(
+        project_name=project_name, output_dir=output_dir, output_file=output_file
+    )
+
+
 def main():
     # Load configuration
-    with EmissionsTracker(project_name="build_features") as tracker:
-        params = load_params()
+    params = load_params()
+    with create_tracker(params, "build_features") as tracker:
         features_cfg = params["features"]["tfidf"]
         outputs = params["features"]["outputs"]
         data_cfg = params["data"]

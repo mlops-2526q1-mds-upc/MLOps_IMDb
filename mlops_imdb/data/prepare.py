@@ -1,6 +1,7 @@
 # src/data/prepare.py
 # Purpose: read raw IMDb CSVs, apply minimal cleaning, write processed CSVs.
 
+from contextlib import nullcontext
 import html
 import os
 import re
@@ -13,6 +14,21 @@ import yaml
 def load_params(path: str = "params.yaml") -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def create_tracker(params: dict, project_name: str):
+    energy_cfg = params.get("energy", {}).get("codecarbon", {})
+    if not energy_cfg.get("enabled"):
+        return nullcontext()
+    output_path = energy_cfg.get("output", "emissions.csv")
+    output_dir, output_file = os.path.split(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+    else:
+        output_dir = "."
+    return EmissionsTracker(
+        project_name=project_name, output_dir=output_dir, output_file=output_file
+    )
 
 
 def clean_text(text: str, cfg: dict) -> str:
@@ -32,8 +48,8 @@ def clean_text(text: str, cfg: dict) -> str:
 
 
 def main():
-    with EmissionsTracker(project_name="prepare_data") as tracker:
-        params = load_params()
+    params = load_params()
+    with create_tracker(params, "prepare_data") as tracker:
         data_cfg = params["data"]
         prep_cfg = params["preprocessing"]
         schema = data_cfg.get("schema", {"text_col": "text", "label_col": "label"})

@@ -204,3 +204,4 @@ notebooks/*.pdf
 *.pkl
 emissions.csv
 powermetrics_log.txt
+.vscode/*
