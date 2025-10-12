@@ -1,7 +1,7 @@
+from pathlib import Path
 import runpy
 import sys
 import types
-from pathlib import Path
 
 import pandas as pd
 
@@ -27,7 +27,7 @@ def test_download_imdb_saves_expected_files(tmp_path, monkeypatch):
     original_module = sys.modules.get(module_name)
     try:
         sys.modules.pop(module_name, None)
-        runpy.run_module(module_name)
+        runpy.run_module(module_name, run_name="__main__")
     finally:
         if original_module is not None:
             sys.modules[module_name] = original_module
