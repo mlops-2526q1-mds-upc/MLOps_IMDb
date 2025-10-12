@@ -1,9 +1,8 @@
 from pathlib import Path
-import runpy
-import sys
-import types
 
 import pandas as pd
+
+from mlops_imdb.data import download_imdb
 
 
 def test_download_imdb_saves_expected_files(tmp_path, monkeypatch):
@@ -12,27 +11,19 @@ def test_download_imdb_saves_expected_files(tmp_path, monkeypatch):
         "test": [{"text": "bad movie", "label": 0}],
     }
 
-    fake_datasets = types.ModuleType("datasets")
-
     def fake_load_dataset(name):
         assert name == "imdb"
         return fake_dataset
 
-    fake_datasets.load_dataset = fake_load_dataset
-
-    monkeypatch.setitem(sys.modules, "datasets", fake_datasets)
+    monkeypatch.setattr(download_imdb, "load_dataset", fake_load_dataset)
+    monkeypatch.setattr(
+        download_imdb,
+        "load_params",
+        lambda path="params.yaml": {"energy": {"codecarbon": {"enabled": False}}},
+    )
     monkeypatch.chdir(tmp_path)
 
-    module_name = "mlops_imdb.data.download_imdb"
-    original_module = sys.modules.get(module_name)
-    try:
-        sys.modules.pop(module_name, None)
-        runpy.run_module(module_name, run_name="__main__")
-    finally:
-        if original_module is not None:
-            sys.modules[module_name] = original_module
-        else:
-            sys.modules.pop(module_name, None)
+    download_imdb.main()
 
     train_path = Path("data/raw/imdb_train.csv")
     test_path = Path("data/raw/imdb_test.csv")
