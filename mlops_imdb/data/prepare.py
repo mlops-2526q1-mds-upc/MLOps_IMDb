@@ -5,6 +5,7 @@ import html
 import os
 import re
 
+from codecarbon import EmissionsTracker
 import pandas as pd
 import yaml
 
@@ -31,41 +32,47 @@ def clean_text(text: str, cfg: dict) -> str:
 
 
 def main():
-    params = load_params()
-    data_cfg = params["data"]
-    prep_cfg = params["preprocessing"]
-    schema = data_cfg.get("schema", {"text_col": "text", "label_col": "label"})
-    text_col = schema["text_col"]
-    label_col = schema["label_col"]
+    with EmissionsTracker(project_name="prepare_data") as tracker:
+        params = load_params()
+        data_cfg = params["data"]
+        prep_cfg = params["preprocessing"]
+        schema = data_cfg.get("schema", {"text_col": "text", "label_col": "label"})
+        text_col = schema["text_col"]
+        label_col = schema["label_col"]
 
-    raw_train = data_cfg["raw"]["train"]
-    raw_test = data_cfg["raw"]["test"]
-    out_train = data_cfg["processed"]["train"]
-    out_test = data_cfg["processed"]["test"]
+        raw_train = data_cfg["raw"]["train"]
+        raw_test = data_cfg["raw"]["test"]
+        out_train = data_cfg["processed"]["train"]
+        out_test = data_cfg["processed"]["test"]
 
-    os.makedirs(os.path.dirname(out_train), exist_ok=True)
+        os.makedirs(os.path.dirname(out_train), exist_ok=True)
 
-    # Read
-    df_train = pd.read_csv(raw_train)
-    df_test = pd.read_csv(raw_test)
+        # Read
+        df_train = pd.read_csv(raw_train)
+        df_test = pd.read_csv(raw_test)
 
-    # Basic schema validation
-    missing_cols = [
-        c for c in (text_col, label_col) if c not in df_train.columns or c not in df_test.columns
-    ]
-    if missing_cols:
-        raise ValueError(f"Missing required columns in input CSVs: {missing_cols}")
+        # Basic schema validation
+        missing_cols = [
+            c
+            for c in (text_col, label_col)
+            if c not in df_train.columns or c not in df_test.columns
+        ]
+        if missing_cols:
+            raise ValueError(f"Missing required columns in input CSVs: {missing_cols}")
 
-    # Clean
-    df_train[text_col] = df_train[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
-    df_test[text_col] = df_test[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
+        # Clean
+        df_train[text_col] = df_train[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
+        df_test[text_col] = df_test[text_col].astype(str).map(lambda s: clean_text(s, prep_cfg))
 
-    # Write
-    df_train.to_csv(out_train, index=False)
-    df_test.to_csv(out_test, index=False)
+        # Write
+        df_train.to_csv(out_train, index=False)
+        df_test.to_csv(out_test, index=False)
 
-    print(f"[prepare] Saved: {out_train}")
-    print(f"[prepare] Saved: {out_test}")
+        print(f"[prepare] Saved: {out_train}")
+        print(f"[prepare] Saved: {out_test}")
+    emissions = getattr(tracker, "final_emissions", None)
+    if emissions is not None:
+        print(f"[emissions] prepare_data: {emissions:.6f} kg CO2eq")
 
 
 if __name__ == "__main__":
