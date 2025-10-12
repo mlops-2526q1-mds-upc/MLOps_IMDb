@@ -202,3 +202,5 @@ notebooks/*.pdf
 
 # Models
 *.pkl
+emissions.csv
+powermetrics_log.txt

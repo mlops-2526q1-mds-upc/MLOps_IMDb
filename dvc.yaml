@@ -1,10 +1,10 @@
 stages:
   prepare:
-    cmd: python src/data/prepare.py
+    cmd: python mlops_imdb/data/prepare.py
     deps:
     - data/raw/imdb_test.csv
     - data/raw/imdb_train.csv
-    - src/data/prepare.py
+    - mlops_imdb/data/prepare.py
     params:
     - data
     - preprocessing
@@ -13,11 +13,11 @@ stages:
     - data/processed/test_clean.csv
     - data/processed/train_clean.csv
   features:
-    cmd: python src/features/build_features.py
+    cmd: python mlops_imdb/features/build_features.py
     deps:
     - data/processed/test_clean.csv
     - data/processed/train_clean.csv
-    - src/features/build_features.py
+    - mlops_imdb/features/build_features.py
     params:
     - features
     outs:
@@ -25,20 +25,20 @@ stages:
     - data/processed/train_features.npz
     - models/tfidf_vectorizer.pkl
   train:
-    cmd: python src/modeling/train.py
+    cmd: python mlops_imdb/modeling/train.py
     deps:
     - data/processed/train_features.npz
-    - src/modeling/train.py
+    - mlops_imdb/modeling/train.py
     params:
     - train
     outs:
     - models/model.pkl
   eval:
-    cmd: python src/modeling/eval.py
+    cmd: python mlops_imdb/modeling/eval.py
     deps:
     - data/processed/test_features.npz
     - models/model.pkl
-    - src/modeling/eval.py
+    - mlops_imdb/modeling/eval.py
     params:
     - eval
     metrics:
