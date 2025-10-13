@@ -5,12 +5,12 @@ stages:
     deps:
     - path: data/raw/imdb_test.csv
       hash: md5
-      md5: 90b9367c418d3ca633671eef1d0aff5f
-      size: 32565148
+      md5: 0b6a6e22790570c21fc32211b41578c3
+      size: 32540147
     - path: data/raw/imdb_train.csv
       hash: md5
-      md5: 62acf68c544d136cc6675df497b6a01f
-      size: 33347168
+      md5: dc4c040dd7f3bfb42a279cb1f73725d5
+      size: 33322167
     - path: mlops_imdb/data/prepare.py
       hash: md5
       md5: c7ae6d44b8c6a9859a7673cafaf8aa62
@@ -42,23 +42,23 @@ stages:
     outs:
     - path: data/processed/test_clean.csv
       hash: md5
-      md5: c96b5d7197046d5d1c9b16fb9580c898
-      size: 32005227
+      md5: 5d0e8e3b8155ad7156fce9c9a496e544
+      size: 31980226
     - path: data/processed/train_clean.csv
       hash: md5
-      md5: 1da332c8b46ee244eeaddd255532af0d
-      size: 32776856
+      md5: 569148bf4dbc190c707a8798b0c27b85
+      size: 32751855
   features:
     cmd: python mlops_imdb/features/build_features.py
     deps:
     - path: data/processed/test_clean.csv
       hash: md5
-      md5: c96b5d7197046d5d1c9b16fb9580c898
-      size: 32005227
+      md5: 5d0e8e3b8155ad7156fce9c9a496e544
+      size: 31980226
     - path: data/processed/train_clean.csv
       hash: md5
-      md5: 1da332c8b46ee244eeaddd255532af0d
-      size: 32776856
+      md5: 569148bf4dbc190c707a8798b0c27b85
+      size: 32751855
     - path: mlops_imdb/features/build_features.py
       hash: md5
       md5: 04914a97a59a5bf5496c4fdfde8ff1de
@@ -81,27 +81,27 @@ stages:
     outs:
     - path: data/processed/test_features.npz
       hash: md5
-      md5: 8a0a08db0632166181082603b9844dff
-      size: 40230615
+      md5: b99a6356a72ef737482a20085ccda967
+      size: 40236187
     - path: data/processed/train_features.npz
       hash: md5
-      md5: ae88cce85c67648381cd756baf7b16a7
-      size: 42017550
+      md5: 4f643f2d6c6e7ad7678ac02109dc6b35
+      size: 42018713
     - path: models/tfidf_vectorizer.pkl
       hash: md5
-      md5: 8681d64262fc5208a3de0c2ede376075
-      size: 377520
+      md5: 4bfbee51db58fd85d3402b0670acfddc
+      size: 377528
   train:
     cmd: python mlops_imdb/modeling/train.py
     deps:
     - path: data/processed/train_features.npz
       hash: md5
-      md5: ae88cce85c67648381cd756baf7b16a7
-      size: 42017550
+      md5: 4f643f2d6c6e7ad7678ac02109dc6b35
+      size: 42018713
     - path: mlops_imdb/modeling/train.py
       hash: md5
-      md5: 09411faf0636dbe3754060d211693b78
-      size: 3826
+      md5: 44ca252ded9fd7ab0e56835f67c51294
+      size: 3836
     params:
       params.yaml:
         train:
@@ -114,22 +114,22 @@ stages:
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: 26dbaad453d8d263e68c3bb3ffb94a94
+      md5: e47c1b356342693729681689004b4cea
       size: 80891
   eval:
     cmd: python mlops_imdb/modeling/eval.py
     deps:
     - path: data/processed/test_features.npz
       hash: md5
-      md5: 8a0a08db0632166181082603b9844dff
-      size: 40230615
+      md5: b99a6356a72ef737482a20085ccda967
+      size: 40236187
     - path: mlops_imdb/modeling/eval.py
       hash: md5
-      md5: 4dea09ce7e88ba2177964e9b5b0fbd52
-      size: 5561
+      md5: 55546809a8ba35f06132c55c530e9add
+      size: 5644
     - path: models/model.pkl
       hash: md5
-      md5: 26dbaad453d8d263e68c3bb3ffb94a94
+      md5: e47c1b356342693729681689004b4cea
       size: 80891
     params:
       params.yaml:
@@ -145,5 +145,5 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: e4b25b07e37f6e9a57a7f52a099e1ce0
-      size: 419
+      md5: a65a68838177197ec53aea4e6cbd1fd7
+      size: 395
