@@ -6,11 +6,11 @@ import os
 
 from codecarbon import EmissionsTracker
 import joblib
+import mlflow
 import pandas as pd
 import scipy.sparse as sp
 from sklearn.linear_model import LogisticRegression
 import yaml
-import mlflow
 
 from mlops_imdb.config import configure_mlflow
 
@@ -54,7 +54,9 @@ def main():
             train_cfg = params["train"]
             logreg_cfg = train_cfg["logreg"]
             outputs = (
-                train_cfg["outputs"] if "outputs" in train_cfg else {"model_path": "models/model.pkl"}
+                train_cfg["outputs"]
+                if "outputs" in train_cfg
+                else {"model_path": "models/model.pkl"}
             )
 
         # Inputs

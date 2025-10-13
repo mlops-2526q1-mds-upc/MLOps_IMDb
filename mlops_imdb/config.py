@@ -1,11 +1,11 @@
 from __future__ import annotations
+
 import os
 from pathlib import Path
-from dotenv import load_dotenv, find_dotenv
+
+from dotenv import find_dotenv, load_dotenv
 from loguru import logger
 import mlflow
-
-
 
 # ---------------------------------------------------------------------
 # 1️⃣ Load .env from project root
@@ -46,13 +46,12 @@ ENV = os.getenv("ENV", "local")
 # 4️⃣ Helper: configure MLflow
 # ---------------------------------------------------------------------
 
+
 def configure_mlflow(experiment_name: str | None = None) -> None:
     """Configure MLflow tracking and experiment using loaded environment variables."""
 
     if not MLFLOW_TRACKING_URI:
-        logger.warning(
-            "⚠️  MLFLOW_TRACKING_URI not set — using local file store (./mlruns)"
-        )
+        logger.warning("⚠️  MLFLOW_TRACKING_URI not set — using local file store (./mlruns)")
         local_uri = f"file:///{(PROJ_ROOT / 'mlruns').as_posix()}"
         mlflow.set_tracking_uri(local_uri)
     else:
@@ -61,9 +60,11 @@ def configure_mlflow(experiment_name: str | None = None) -> None:
     mlflow.set_experiment(experiment_name or MLFLOW_EXPERIMENT)
     logger.info(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
 
+
 # ---------------------------------------------------------------------
 # 5️⃣ Debug print (optional)
 # ---------------------------------------------------------------------
+
 
 def print_env_summary() -> None:
     """Print which variables were loaded (without exposing secrets)."""

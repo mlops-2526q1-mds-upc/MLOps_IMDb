@@ -8,6 +8,7 @@ import os
 from codecarbon import EmissionsTracker
 import joblib
 import matplotlib.pyplot as plt
+import mlflow
 import pandas as pd
 import scipy.sparse as sp
 from sklearn.metrics import (
@@ -16,7 +17,6 @@ from sklearn.metrics import (
     precision_recall_fscore_support,
 )
 import yaml
-import mlflow
 
 from mlops_imdb.config import configure_mlflow
 
