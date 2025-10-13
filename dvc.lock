@@ -13,8 +13,8 @@ stages:
       size: 33322167
     - path: mlops_imdb/data/prepare.py
       hash: md5
-      md5: 6bfb1cb82dbf410b63053dc757efabcb
-      size: 3075
+      md5: 2d0a5aad04b9c6380d21900db29fa0d1
+      size: 3089
     params:
       params.yaml:
         data:
@@ -61,8 +61,8 @@ stages:
       size: 32751855
     - path: mlops_imdb/features/build_features.py
       hash: md5
-      md5: 0d8ae916d0c9a3239ce0d46517e4d21c
-      size: 3209
+      md5: aaf5a60c1beb3ff04e18db91cf7ab3d6
+      size: 3223
     params:
       params.yaml:
         features:
@@ -89,7 +89,7 @@ stages:
       size: 42018713
     - path: models/tfidf_vectorizer.pkl
       hash: md5
-      md5: d95464b80ac8a5ec2dfd00ce3ddc1739
+      md5: 47ed2fcd27fd8097fb6b674e4a636119
       size: 377528
   train:
     cmd: python mlops_imdb/modeling/train.py
@@ -100,8 +100,8 @@ stages:
       size: 42018713
     - path: mlops_imdb/modeling/train.py
       hash: md5
-      md5: 4185546475240a901ee119e197479538
-      size: 2476
+      md5: d14345af35f8b61821d48cb880b3a18d
+      size: 2490
     params:
       params.yaml:
         train:
@@ -125,8 +125,8 @@ stages:
       size: 40236187
     - path: mlops_imdb/modeling/eval.py
       hash: md5
-      md5: d812b8dc8a90ba1b6c2f7bc87818d7f9
-      size: 4207
+      md5: fb3572f596b7c69ede1121a98737a392
+      size: 4206
     - path: models/model.pkl
       hash: md5
       md5: e47c1b356342693729681689004b4cea

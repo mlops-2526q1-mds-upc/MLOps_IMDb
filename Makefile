@@ -80,6 +80,12 @@ data: requirements
 	$(PYTHON_INTERPRETER) mlops_imdb/dataset.py
 
 
+## Build project report PDF
+.PHONY: report
+report:
+	latexmk -pdf -cd reports/latex/report.tex
+
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
