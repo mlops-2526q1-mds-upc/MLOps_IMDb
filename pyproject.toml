@@ -23,10 +23,12 @@ dependencies = [
     "jupyterlab",
     "loguru",
     "matplotlib",
+    "mlflow>=3.4.0",
     "notebook",
     "numpy",
     "pandas",
     "pip",
+    "protobuf<5",
     "pytest",
     "python-dotenv",
     "ruff",
@@ -55,4 +57,3 @@ dev = [
     "pre-commit>=4.3.0",
     "ruff>=0.7.0",  # or latest stable
 ]
-
