@@ -1,0 +1,19 @@
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Goal of the Project}{2}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Methodology}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Milestone 1: Inception}{2}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Problem Selection and Requirements}{2}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Dataset Card Summary}{2}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3}Model Card Summary}{3}{subsubsection.2.1.3}%
+\contentsline {subsubsection}{\numberline {2.1.4}Project Coordination and Communication}{3}{subsubsection.2.1.4}%
+\contentsline {subsubsection}{\numberline {2.1.5}Selection of Cloud Provider}{3}{subsubsection.2.1.5}%
+\contentsline {subsection}{\numberline {2.2}Milestone 2: Model Building -- Reproducibility}{3}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Project Structure}{3}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Code Versioning}{3}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Data Versioning}{3}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Experiment Tracking}{4}{subsubsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.3}Milestone 3: Model Building -- Quality Assurance}{5}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Energy Efficiency Awareness}{5}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Static Code Analysis}{5}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Model Testing}{6}{subsubsection.2.3.3}%
+\contentsline {subsubsection}{\numberline {2.3.4}Data Testing}{6}{subsubsection.2.3.4}%

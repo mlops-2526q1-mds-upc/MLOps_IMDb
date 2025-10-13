@@ -5,73 +5,89 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{xcolor}
 \graphicspath{{../figures/}}
 
-\title{MLOps Report: IMDb Sentiment Analysis Pipeline}
+\title{MLOps Report: IMDb Sentiment Analysis}
 \author{UPC MLOps Team}
 \date{\today}
 
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Huge \textbf{MLOps Report}}\\[0.8cm]
+  {\LARGE IMDb Sentiment Analysis}\\[1.5cm]
+  {\Large UPC MLOps Team}\\[0.5cm]
+  {\large \today}\\[4cm]
+  \includegraphics[width=0.4\textwidth]{fib-upc-logo.png}\\[1cm]
+  {\large Machine Learning Operations -- Academic Year 2024/2025}
+\end{titlepage}
+
+\tableofcontents
+\newpage
 
 \section{Introduction}
-This report summarises the development of an end-to-end machine learning (ML) component for IMDb film review sentiment classification. The objective is to deliver a reproducible pipeline that ingests raw reviews, trains a text classifier, and exposes evaluation artefacts suitable for integration into a broader ML-based product. The project embraces MLOps practices, including data versioning, configuration management, and automated evaluation.
+\subsection{Goal of the Project}
+The project delivers an end-to-end analytics platform that ingests comment sections from major movie-review websites, filters noise such as spam or off-topic content, and extracts sentiment signals that can support downstream dashboards. Starting from the \texttt{cookiecutter-data-science} template, we built a reproducible pipeline that downloads the IMDb benchmark dataset, cleans and vectorises text, trains a logistic regression model, and evaluates it against held-out examples. The success criteria agreed during inception were:\begin{itemize}[leftmargin=*]
+  \item Produce sentiment metrics (accuracy, F1) above 0.85 while maintaining resilience to noisy inputs (spam-filtering and HTML stripping).
+  \item Reproduce the full data and model workflow via DVC with a single \texttt{dvc repro}.
+  \item Track experiments (hyperparameters, metrics, artefacts, emissions) in MLflow to support iterative analysis of comment streams.
+\end{itemize}
+The latest evaluation run (see Section~\ref{subsec:milestone2}) satisfies these targets, with the logistic regression classifier reaching 0.894 accuracy and 0.895 F1.
 
-\section{Dataset Overview}
-The pipeline sources the public \texttt{imdb} dataset from Hugging Face via the \texttt{datasets} library (\texttt{mlops\_imdb/data/download\_imdb.py}). The dataset consists of 50{,}000 English-language movie reviews labelled as positive (\(1\)) or negative (\(0\)), already split into equally sized training and test partitions. After download, raw files are stored under \texttt{data/raw/} for reproducibility.
+\section{Methodology}
+\subsection{Milestone 1: Inception}
+\subsubsection{Problem Selection and Requirements}
+We selected binary sentiment classification for IMDb reviews because it combines natural language processing with clear business value (gauging audience sentiment) and publicly available benchmark data. Functional requirements include batch scoring of text reviews and traceable metrics. Non-functional requirements emphasise reproducibility, energy-awareness, and compatibility with container deployment.
 
-\section{Exploratory Data Analysis}
-Preliminary exploration, performed in \texttt{notebooks/1.0-exploration-imdb.ipynb}, guides feature design and model assumptions. The balanced label split helps ensure unbiased optimisation (Figure~\ref{fig:label_dist}), while the long-tailed review length distribution (Figure~\ref{fig:text_len}) motivated normalising whitespace and retaining bi-grams during TF--IDF feature extraction.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=1\textwidth]{label_distribution.png}
-  \caption{Sentiment label distribution in the IMDb dataset (train + test).}
-  \label{fig:label_dist}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=1\textwidth]{text_length_distribution.png}
-  \caption{Distribution of tokenised review lengths highlighting long-form texts.}
-  \label{fig:text_len}
-\end{figure}
-
-\section{Pipeline Orchestration and Tooling}
-\begin{itemize}[leftmargin=*]
-  \item \textbf{Pipeline management:} DVC orchestrates the stages defined in \texttt{dvc.yaml} (\texttt{prepare} \(\rightarrow\) \texttt{features} \(\rightarrow\) \texttt{train} \(\rightarrow\) \texttt{eval}). Parameterisation is centralised in \texttt{params.yaml}, enabling consistent configuration across stages.
-  \item \textbf{Energy tracking:} Each stage optionally instantiates a CodeCarbon \texttt{EmissionsTracker}, configured via the \texttt{energy.codecarbon} section of \texttt{params.yaml}, to capture environmental impact.
-  \item \textbf{Testing:} Pytest suites (e.g. \texttt{tests/data/test\_download\_imdb.py}) validate critical behaviours such as dataset retrieval, safeguarding the pipeline against regressions.
+\subsubsection{Dataset Card Summary}
+The dataset card (\texttt{data/README.md}) follows the Hugging Face template. It documents:\begin{itemize}[leftmargin=*]
+  \item \textbf{Provenance and Licence:} IMDb reviews under the IMDb Terms of Use, crowdsourced annotations, English-only content.
+  \item \textbf{Composition:} 50,000 labelled reviews (25k train / 25k test), binary sentiment.
+  \item \textbf{Motivation and Uses:} Benchmarking sentiment analysis models, educational demonstrations, not suitable for nuanced or multilingual sentiment.
+  \item \textbf{Collection Process:} Neutral reviews excluded, balance enforced between polarities.
+  \item \textbf{Limitations \& Biases:} Domain specificity, possible demographic bias, binary simplification of sentiment.
+  \item \textbf{Citation:} Maas et al. (2011) reference for reproducible acknowledgement.
 \end{itemize}
 
-\section{Data Preparation}
-The preparation step (\texttt{mlops\_imdb/data/prepare.py}) performs deterministic cleansing:
-\begin{itemize}[leftmargin=*]
-  \item Lowercases text and removes HTML tags.
-  \item Decodes HTML entities and normalises whitespace, ensuring compact token sequences.
-  \item Validates required schema columns (\texttt{text}, \texttt{label}) in both train and test CSVs.
+\subsubsection{Model Card Summary}
+The model card (\texttt{models/README.md}) captures:\begin{itemize}[leftmargin=*]
+  \item \textbf{Model Description:} TF--IDF features with a scikit-learn logistic regression classifier.
+  \item \textbf{Intended Uses:} Baseline benchmarking and teaching reproducible MLOps practices; not for high-stakes production.
+  \item \textbf{Training Procedure:} 25k train / 25k test split, TF--IDF with 1--2 grams, logistic regression (liblinear solver).
+  \item \textbf{Evaluation:} Accuracy and F1 typically above 0.82, with current run at 0.894/0.895.
+  \item \textbf{Limitations and Ethics:} English-only, binary polarity, sensitivity to sarcasm, potential demographic bias.
 \end{itemize}
-The cleaned outputs are saved to \texttt{data/processed/train\_clean.csv} and \texttt{data/processed/test\_clean.csv}. A fixed random seed (\(42\)) is maintained for any stochastic operations, although the current pipeline leverages the canonical IMDb split.
 
-\section{Feature Engineering}
-TF--IDF features are produced in \texttt{mlops\_imdb/features/build\_features.py}. Key configuration values include:
-\begin{itemize}[leftmargin=*]
-  \item Maximum vocabulary size of 10{,}000 terms.
-  \item Bi-gram coverage via \(n\)-gram range \([1, 2]\).
-  \item Frequency cut-offs with \texttt{min\_df} \(=2\) and \texttt{max\_df} \(=0.95\).
-\end{itemize}
-The resulting sparse matrices are persisted as \texttt{.npz} files for both training and test sets, alongside the serialised \texttt{TfidfVectorizer}. This design minimises memory footprint and keeps model training decoupled from textual pre-processing.
+\subsubsection{Project Coordination and Communication}
+We operate with a lightweight Scrum cadence: weekly planning and review ceremonies guide backlog priorities, while daily asynchronous stand-ups surface blockers. Slack hosts coordination, and its GitHub and Jira integrations post activity notifications and ticket updates into a shared channel, keeping sprint status visible despite distributed schedules.
 
-\section{Model Training}
-A logistic regression classifier (\texttt{mlops\_imdb/modeling/train.py}) is trained on the TF--IDF features. The configuration leverages the \texttt{liblinear} solver to handle sparse input efficiently, with \( \texttt{max\_iter} = 1000 \) and \( \texttt{random\_state} = 42 \). The fitted model is persisted to \texttt{models/model.pkl} using \texttt{joblib}, ensuring compatibility with downstream inference scripts such as \texttt{mlops\_imdb/modeling/predict\_one.py}.
+\subsubsection{Selection of Cloud Provider}
+For Milestone~4 we plan to deploy the inference service on Google Cloud Run. Its fully managed container runtime, integration with Artifact Registry, and generous free tier make it a pragmatic choice for lightweight academic workloads while providing a path to autoscaling if needed.
 
-\section{Model Evaluation}
-The evaluation stage (\texttt{mlops\_imdb/modeling/eval.py}) loads the trained model and test features to compute standard classification metrics. Results are stored in \texttt{reports/metrics.json} and a confusion matrix figure (\texttt{reports/figures/baseline\_confusion\_matrix.png}). Table~\ref{tab:metrics} summarises the latest evaluation run based on that artefact.
+\subsection{Milestone 2: Model Building -- Reproducibility}\label{subsec:milestone2}
+\subsubsection{Project Structure}
+The repository inherits the \texttt{cookiecutter-data-science} scaffold, separating code under \texttt{mlops\_imdb/}, configuration in \texttt{params.yaml}, data artefacts under \texttt{data/}, and generated reports beneath \texttt{reports/}. This consistent layout eases onboarding and tooling integration.
 
-\begin{table}[h]
+\subsubsection{Code Versioning}
+We apply GitHub Flow on top of the enforced branch naming convention (\texttt{feature/}, \texttt{fix/}, \texttt{chore/}, \texttt{docs/}, \texttt{experiment/}). Conventional Commit messages feed changelogs and are validated via PR automation (Section~\ref{sec:collab}).
+
+\subsubsection{Data Versioning}
+DVC stages (\texttt{prepare} $\rightarrow$ \texttt{features} $\rightarrow$ \texttt{train} $\rightarrow$ \texttt{eval}) encode dependencies and outputs. Regenerating the pipeline uses \texttt{dvc repro}, guaranteeing deterministic artefact creation (\texttt{data/processed}, \texttt{models/}, \texttt{reports/metrics.json}, figures).
+\includegraphics[width=1\textwidth]{dvc_pipeline.png}
+\subsubsection{Experiment Tracking}
+MLflow is configured through \texttt{mlops\_imdb/config.py}. Both training and evaluation stages wrap their execution in \texttt{mlflow.start\_run}, logging hyperparameters, dataset dimensions, metrics, confusion-matrix artefacts, and CodeCarbon emissions under the shared \texttt{emissions\_kg} metric. Local runs default to \texttt{./mlruns}, while remote tracking URIs can be supplied via environment variables.
+
+\subsubsection*{Evaluation Results}
+Table~\ref{tab:metrics} summarises the most recent evaluation metrics sourced from \texttt{reports/metrics.json}. The confusion matrix in Figure~\ref{fig:cm} reveals a balanced error profile across classes.
+
+\begin{table}[H]
   \centering
-  \caption{Binary classification performance on the IMDb test split.}
+  \caption{IMDb test performance (logistic regression baseline).}
   \label{tab:metrics}
   \begin{tabular}{lcccc}
     \toprule
@@ -82,30 +98,20 @@ The evaluation stage (\texttt{mlops\_imdb/modeling/eval.py}) loads the trained m
   \end{tabular}
 \end{table}
 
-The confusion matrix recorded in \texttt{reports/metrics.json} indicates balanced performance across classes:
-\[
-\begin{bmatrix}
-11121 & 1379 \\
-1263 & 11237
-\end{bmatrix}
-\]
-which corresponds to 22{,}358 correct predictions out of 25{,}000 test samples. The model makes 1{,}379 false positives and 1{,}263 false negatives, highlighting slightly better recall than precision. Figure~\ref{fig:cm} illustrates the confusion matrix generated during evaluation.
-
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{baseline_confusion_matrix.png}
-  \caption{Confusion matrix for the logistic regression classifier.}
+  \includegraphics[width=0.75\textwidth]{baseline_confusion_matrix.png}
+  \caption{Confusion matrix on the IMDb test split.}
   \label{fig:cm}
 \end{figure}
 
-QA thresholds specified in \texttt{params.yaml} (\( \texttt{min\_accuracy} = \texttt{min\_f1} = 0.85 \)) are satisfied, supporting promotion of this model to downstream environments.
+\subsection{Milestone 3: Model Building -- Quality Assurance}
+\subsubsection{Energy Efficiency Awareness}
+CodeCarbon contexts wrap every DVC stage. The run captured in \texttt{reports/codecarbon\_emissions.csv} emitted 7.15\,mg CO\(_2\)eq over 27.1\,seconds (Table~\ref{tab:carbon}), with feature generation dominating the footprint. Emission figures are logged back to MLflow, enabling longitudinal monitoring.
 
-\section{Energy and Carbon Monitoring}
-DVC runs executed with CodeCarbon tracking (\texttt{reports/codecarbon\_emissions.csv}) show that the full pipeline emitted only \(7.15\)~mg CO\(_2\)eq over \(27.1\)~seconds on the Apple~M4 development laptop. Table~\ref{tab:carbon} details the per-stage footprint, highlighting feature extraction as the dominant contributor. Power traces stored in \texttt{reports/powermetrics\_log.txt} confirm modest CPU draw (approximately \(3.4\)~W) with no GPU utilisation, consistent with the lightweight logistic-regression workload.
-
-\begin{table}[h]
+\begin{table}[H]
   \centering
-  \caption{CodeCarbon emissions per pipeline stage (values in mg CO\(_2\)eq).}
+  \caption{CodeCarbon emissions per stage (mg CO\(_2\)eq).}
   \label{tab:carbon}
   \begin{tabular}{lcc}
     \toprule
@@ -121,25 +127,13 @@ DVC runs executed with CodeCarbon tracking (\texttt{reports/codecarbon\_emission
   \end{tabular}
 \end{table}
 
-\section{Coding Standards and Tooling}
-Static analysis relies on Ruff, configured in \texttt{pyproject.toml} to enforce a project-wide line length of \(99\) characters and to treat \texttt{mlops\_imdb} as the first-party import namespace. The configuration enables both linting and auto-formatting, with import ordering (\texttt{I} checks) turned on so that \texttt{ruff check} harmonises third-party and local imports. These conventions are codified in the Make targets \texttt{make lint} (audit only) and \texttt{make format} (auto-fix then format). The \texttt{dev} dependency group also pins Ruff for local development and integrates with optional pre-commit hooks, ensuring contributors receive consistent feedback before code reaches the repository.
+\subsubsection{Static Code Analysis}
+Ruff enforces formatting and linting (line length 99, import sorting, code-style checks). The CI pipeline (CI/CD Automation in Milestone 5) runs \texttt{uv run ruff format --check} and \texttt{uv run ruff check} on every push and pull request.
 
-\section{Operational Considerations}
-\begin{itemize}[leftmargin=*]
-  \item \textbf{Reproducibility:} DVC pipelines combined with version-controlled parameters guarantee deterministic runs. Processed artefacts (cleaned data, features, model, metrics) are stored under tracked directories, simplifying handoffs.
-  \item \textbf{Deployment readiness:} The project includes inference scripts (\texttt{mlops\_imdb/modeling/predict\_one.py}) and configurable prediction paths (\texttt{params.yaml}) to facilitate batch or online scoring workflows.
-  \item \textbf{Energy monitoring:} CodeCarbon hooks produce emissions reports (e.g. \texttt{reports/codecarbon\_emissions.csv}), enabling sustainability tracking for future iterations.
-\end{itemize}
+\subsubsection{Model Testing}
+Pytest suites validate the training and evaluation flows using synthetic sparse matrices (see \texttt{tests/modeling/}). Assertions confirm persisted models expose coefficients, metrics JSON contains expected fields, and confusion matrices are rendered as PNG files.
 
-\section{MLflow Tracking (Placeholder)}
-MLflow integration is planned but not yet implemented. This section will outline experiment tracking configuration, run metadata, and metric logging once the team enables MLflow in the pipeline.
-
-\section{Conclusions and Next Steps}
-The current pipeline delivers a robust baseline sentiment model with near 90\% accuracy on IMDb reviews. Immediate next steps include:
-\begin{itemize}[leftmargin=*]
-  \item Integrating MLflow to manage experiment metadata and model registry operations.
-  \item Evaluating alternative models (e.g. linear SVM, transformer-based encoders) to benchmark gains over logistic regression.
-  \item Expanding automated tests to cover feature generation and evaluation logic, further strengthening quality assurance.
-\end{itemize}
+\subsubsection{Data Testing}
+Data preparation tests (\texttt{tests/data/test\_prepare.py}) exercise schema validation and text-cleaning behaviours, while \texttt{tests/data/test\_download\_imdb.py} mocks the dataset download to assure reproducible CSV outputs. Although we do not yet employ Great Expectations, these lightweight checks catch regressions in preprocessing logic.
 
 \end{document}
