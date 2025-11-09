@@ -2,32 +2,32 @@ stages:
   prepare:
     cmd: python mlops_imdb/data/prepare.py
     deps:
+    - mlops_imdb/data/prepare.py
     - data/raw/imdb_test.csv
     - data/raw/imdb_train.csv
-    - mlops_imdb/data/prepare.py
     params:
     - data
     - preprocessing
     - random_seed
     outs:
-    - data/processed/test_clean.csv
-    - data/processed/train_clean.csv
+    - data/processed/imdb_test_clean.csv
+    - data/processed/imdb_train_clean.csv
   features:
     cmd: python mlops_imdb/features/build_features.py
     deps:
-    - data/processed/test_clean.csv
-    - data/processed/train_clean.csv
+    - data/processed/imdb_test_clean.csv
+    - data/processed/imdb_train_clean.csv
     - mlops_imdb/features/build_features.py
     params:
     - features
     outs:
-    - data/processed/test_features.npz
-    - data/processed/train_features.npz
+    - data/processed/imdb_test_features.npz
+    - data/processed/imdb_train_features.npz
     - models/tfidf_vectorizer.pkl
   train:
     cmd: python mlops_imdb/modeling/train.py
     deps:
-    - data/processed/train_features.npz
+    - data/processed/imdb_train_features.npz
     - mlops_imdb/modeling/train.py
     params:
     - train
@@ -36,7 +36,7 @@ stages:
   eval:
     cmd: python mlops_imdb/modeling/eval.py
     deps:
-    - data/processed/test_features.npz
+    - data/processed/imdb_test_features.npz
     - models/model.pkl
     - mlops_imdb/modeling/eval.py
     params:

@@ -1,7 +1,6 @@
 # Data
-/data/*
-!/data/*.dvc
-!/data/**/*.dvc
+*.csv
+*.json
 !/data/split_info.json
 !/data/.gitignore
 

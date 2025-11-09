@@ -2,13 +2,21 @@ import joblib
 import pandas as pd
 import scipy.sparse as sp
 
+from mlops_imdb import config as mlflow_config
 from mlops_imdb.modeling import train
 
 
 def test_main_trains_and_saves_model(tmp_path, monkeypatch):
-    features_path = tmp_path / "train_features.npz"
-    labels_csv = tmp_path / "train_clean.csv"
+    features_path = tmp_path / "imdb_train_features.npz"
+    labels_csv = tmp_path / "imdb_train_clean.csv"
     model_path = tmp_path / "model.pkl"
+    tracking_dir = tmp_path / "mlruns"
+    tracking_dir.mkdir()
+    tracking_uri = tracking_dir.as_uri()
+
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", tracking_uri)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_TRACKING_URI", tracking_uri, raising=False)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_EXPERIMENT", "test-train", raising=False)
 
     X = sp.csr_matrix([[0.0, 1.0], [1.0, 0.0]])
     sp.save_npz(features_path, X)

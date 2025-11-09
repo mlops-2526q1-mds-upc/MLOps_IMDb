@@ -6,16 +6,16 @@ from mlops_imdb.features import build_features
 
 
 def test_main_builds_tfidf_features(tmp_path, monkeypatch):
-    train_csv = tmp_path / "train_clean.csv"
-    test_csv = tmp_path / "test_clean.csv"
+    train_csv = tmp_path / "imdb_train_clean.csv"
+    test_csv = tmp_path / "imdb_test_clean.csv"
     features_dir = tmp_path / "features"
     models_dir = tmp_path / "models"
 
     pd.DataFrame({"text": ["good movie", "bad film"]}).to_csv(train_csv, index=False)
     pd.DataFrame({"text": ["great acting", "poor script"]}).to_csv(test_csv, index=False)
 
-    train_features = features_dir / "train_features.npz"
-    test_features = features_dir / "test_features.npz"
+    train_features = features_dir / "imdb_train_features.npz"
+    test_features = features_dir / "imdb_test_features.npz"
     vectorizer_path = models_dir / "tfidf.pkl"
 
     params = {

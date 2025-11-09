@@ -19,6 +19,7 @@ dependencies = [
     "codecarbon>=3.0.5",
     "datasets",
     "dvc",
+    "dvc-s3>=3.2.2",
     "ipython",
     "jupyterlab",
     "loguru",

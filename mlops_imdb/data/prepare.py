@@ -4,7 +4,10 @@
 from contextlib import nullcontext
 import html
 import os
+from pathlib import Path
 import re
+import subprocess
+from typing import List, Optional, Sequence
 
 from codecarbon import EmissionsTracker
 import pandas as pd
@@ -47,6 +50,37 @@ def clean_text(text: str, cfg: dict) -> str:
     return text
 
 
+def ensure_raw_files_exist(raw_files: Sequence[str], remote: Optional[str] = "origin") -> None:
+    """Pull raw CSVs with DVC if they are missing locally."""
+    missing = [Path(p) for p in raw_files if not Path(p).is_file()]
+    if not missing:
+        return
+
+    print("[prepare] Raw CSVs missing locally. Pulling from DVC remote...")
+    targets: List[str] = []
+    for path in missing:
+        dvc_pointer = Path(f"{path}.dvc")
+        targets.append(str(dvc_pointer if dvc_pointer.is_file() else path))
+
+    cmd = ["dvc", "pull"]
+    if remote:
+        cmd += ["--remote", remote]
+    cmd += targets
+
+    try:
+        subprocess.run(cmd, check=True)
+    except FileNotFoundError as exc:
+        raise RuntimeError(
+            "Unable to pull data because the `dvc` CLI is not available in PATH."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("`dvc pull` failed. See output above for details.") from exc
+
+    remaining = [str(p) for p in missing if not p.is_file()]
+    if remaining:
+        raise RuntimeError(f"Failed to retrieve raw data files: {remaining}")
+
+
 def main():
     params = load_params()
     with create_tracker(params, "prepare_data") as tracker:
@@ -60,6 +94,9 @@ def main():
         raw_test = data_cfg["raw"]["test"]
         out_train = data_cfg["processed"]["train"]
         out_test = data_cfg["processed"]["test"]
+        remote = os.environ.get("DVC_REMOTE") or data_cfg.get("remote") or "origin"
+
+        ensure_raw_files_exist([raw_train, raw_test], remote=remote)
 
         os.makedirs(os.path.dirname(out_train), exist_ok=True)
 

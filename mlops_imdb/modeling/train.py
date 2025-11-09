@@ -60,14 +60,14 @@ def main():
             )
 
             # Inputs
-            X_train_path = params["features"]["outputs"]["train_features"]
+            x_train_path = params["features"]["outputs"]["train_features"]
             train_csv_path = data_cfg["processed"]["train"]
 
             # Output
             model_path = outputs["model_path"]
 
             # Load data
-            X_train = sp.load_npz(X_train_path)
+            X_train = sp.load_npz(x_train_path)
             y_train = pd.read_csv(train_csv_path)[label_col].astype(int).values
 
             # Define model (solver must support sparse input)

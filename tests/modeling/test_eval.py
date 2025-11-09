@@ -1,10 +1,12 @@
 import json
+import os
 
 import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
+from mlops_imdb import config as mlflow_config
 from mlops_imdb.modeling import eval as eval_module
 
 
@@ -33,11 +35,18 @@ def test_save_confusion_matrix_png(tmp_path):
 
 
 def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
-    features_path = tmp_path / "test_features.npz"
-    test_csv = tmp_path / "test_clean.csv"
+    features_path = tmp_path / "imdb_test_features.npz"
+    test_csv = tmp_path / "imdb_test_clean.csv"
     model_path = tmp_path / "model.pkl"
     metrics_path = tmp_path / "reports" / "metrics.json"
     cm_path = tmp_path / "reports" / "figures" / "cm.png"
+    tracking_dir = tmp_path / "mlruns"
+    tracking_dir.mkdir()
+    tracking_uri = tracking_dir.as_uri()
+
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", tracking_uri)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_TRACKING_URI", tracking_uri, raising=False)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_EXPERIMENT", "test-eval", raising=False)
 
     X = sp.csr_matrix([[1.0, 0.0], [0.0, 1.0]])
     sp.save_npz(features_path, X)
@@ -78,3 +87,25 @@ def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
 
     with open(cm_path, "rb") as fh:
         assert fh.read(8).startswith(b"\x89PNG")
+
+
+def test_last_evaluation_accuracy_threshold():
+    """Test that the last evaluation from mlflow has accuracy above 0.85."""
+    metrics_path = "reports/metrics.json"
+
+    # Check if metrics file exists
+    assert os.path.exists(metrics_path), (
+        f"Metrics file not found at {metrics_path}. " "Please run evaluation first."
+    )
+
+    # Load metrics
+    with open(metrics_path, "r", encoding="utf-8") as fh:
+        metrics = json.load(fh)
+
+    # Check accuracy threshold
+    accuracy = metrics.get("accuracy")
+    assert accuracy is not None, "Accuracy metric not found in metrics.json"
+    assert accuracy > 0.85, (
+        f"Model accuracy {accuracy:.4f} is below the required threshold of 0.85. "
+        "Please retrain the model or adjust features to improve performance."
+    )

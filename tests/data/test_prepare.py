@@ -38,8 +38,8 @@ def test_main_processes_raw_csvs(monkeypatch, tmp_path):
 
     train_raw = raw_dir / "train.csv"
     test_raw = raw_dir / "test.csv"
-    train_processed = processed_dir / "train_clean.csv"
-    test_processed = processed_dir / "test_clean.csv"
+    train_processed = processed_dir / "imdb_train_clean.csv"
+    test_processed = processed_dir / "imdb_test_clean.csv"
 
     pd.DataFrame(
         {
@@ -84,8 +84,8 @@ def test_main_raises_for_missing_columns(monkeypatch, tmp_path):
 
     train_raw = raw_dir / "train.csv"
     test_raw = raw_dir / "test.csv"
-    train_processed = processed_dir / "train_clean.csv"
-    test_processed = processed_dir / "test_clean.csv"
+    train_processed = processed_dir / "imdb_train_clean.csv"
+    test_processed = processed_dir / "imdb_test_clean.csv"
 
     # Missing label column in train and text column in test to trigger validation
     pd.DataFrame({"text": ["sample only"]}).to_csv(train_raw, index=False)
