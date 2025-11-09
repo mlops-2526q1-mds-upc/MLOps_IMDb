@@ -39,12 +39,7 @@ Follow these steps to set up the project environment and run the complete pipeli
    uv sync
    ```
 
-4. **Download the IMDB dataset**
-   ```bash
-   python mlops_imdb/data/download_imdb.py
-   ```
-
-5. **Run the complete DVC pipeline**
+4. **Run the complete DVC pipeline**
    ```bash
    dvc repro
    ```

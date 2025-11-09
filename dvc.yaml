@@ -2,8 +2,6 @@ stages:
   prepare:
     cmd: python mlops_imdb/data/prepare.py
     deps:
-    - data/raw/imdb_test.csv
-    - data/raw/imdb_train.csv
     - mlops_imdb/data/prepare.py
     params:
     - data
