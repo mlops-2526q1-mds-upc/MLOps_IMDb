@@ -7,8 +7,8 @@ from mlops_imdb.modeling import train
 
 
 def test_main_trains_and_saves_model(tmp_path, monkeypatch):
-    features_path = tmp_path / "train_features.npz"
-    labels_csv = tmp_path / "train_clean.csv"
+    features_path = tmp_path / "imdb_train_features.npz"
+    labels_csv = tmp_path / "imdb_train_clean.csv"
     model_path = tmp_path / "model.pkl"
     tracking_dir = tmp_path / "mlruns"
     tracking_dir.mkdir()

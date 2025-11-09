@@ -35,8 +35,8 @@ def test_save_confusion_matrix_png(tmp_path):
 
 
 def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
-    features_path = tmp_path / "test_features.npz"
-    test_csv = tmp_path / "test_clean.csv"
+    features_path = tmp_path / "imdb_test_features.npz"
+    test_csv = tmp_path / "imdb_test_clean.csv"
     model_path = tmp_path / "model.pkl"
     metrics_path = tmp_path / "reports" / "metrics.json"
     cm_path = tmp_path / "reports" / "figures" / "cm.png"

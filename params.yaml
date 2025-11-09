@@ -6,8 +6,8 @@ data:
     train: data/raw/imdb_train.csv
     test: data/raw/imdb_test.csv
   processed:
-    train: data/processed/train_clean.csv
-    test: data/processed/test_clean.csv
+    train: data/processed/imdb_train_clean.csv
+    test: data/processed/imdb_test_clean.csv
   split_info: data/split_info.json
   schema:
     text_col: text
@@ -31,8 +31,8 @@ features:
     min_df: 2
     max_df: 0.95
   outputs:
-    train_features: data/processed/train_features.npz
-    test_features: data/processed/test_features.npz
+    train_features: data/processed/imdb_train_features.npz
+    test_features: data/processed/imdb_test_features.npz
     vectorizer_path: models/tfidf_vectorizer.pkl
 
 train:

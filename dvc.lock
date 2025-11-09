@@ -3,10 +3,18 @@ stages:
   prepare:
     cmd: python mlops_imdb/data/prepare.py
     deps:
+    - path: data/raw/imdb_test.csv
+      hash: md5
+      md5: 0b6a6e22790570c21fc32211b41578c3
+      size: 32540147
+    - path: data/raw/imdb_train.csv
+      hash: md5
+      md5: dc4c040dd7f3bfb42a279cb1f73725d5
+      size: 33322167
     - path: mlops_imdb/data/prepare.py
       hash: md5
-      md5: e94cd606e6e69058bfac68835d165950
-      size: 4527
+      md5: b31960536d19dc776da4838f0d64e392
+      size: 4581
     params:
       params.yaml:
         data:
@@ -14,8 +22,8 @@ stages:
             train: data/raw/imdb_train.csv
             test: data/raw/imdb_test.csv
           processed:
-            train: data/processed/train_clean.csv
-            test: data/processed/test_clean.csv
+            train: data/processed/imdb_train_clean.csv
+            test: data/processed/imdb_test_clean.csv
           split_info: data/split_info.json
           schema:
             text_col: text
@@ -32,22 +40,22 @@ stages:
           normalize_whitespace: true
         random_seed: 42
     outs:
-    - path: data/processed/test_clean.csv
+    - path: data/processed/imdb_test_clean.csv
       hash: md5
       md5: 5d0e8e3b8155ad7156fce9c9a496e544
       size: 31980226
-    - path: data/processed/train_clean.csv
+    - path: data/processed/imdb_train_clean.csv
       hash: md5
       md5: 569148bf4dbc190c707a8798b0c27b85
       size: 32751855
   features:
     cmd: python mlops_imdb/features/build_features.py
     deps:
-    - path: data/processed/test_clean.csv
+    - path: data/processed/imdb_test_clean.csv
       hash: md5
       md5: 5d0e8e3b8155ad7156fce9c9a496e544
       size: 31980226
-    - path: data/processed/train_clean.csv
+    - path: data/processed/imdb_train_clean.csv
       hash: md5
       md5: 569148bf4dbc190c707a8798b0c27b85
       size: 32751855
@@ -67,15 +75,15 @@ stages:
             min_df: 2
             max_df: 0.95
           outputs:
-            train_features: data/processed/train_features.npz
-            test_features: data/processed/test_features.npz
+            train_features: data/processed/imdb_train_features.npz
+            test_features: data/processed/imdb_test_features.npz
             vectorizer_path: models/tfidf_vectorizer.pkl
     outs:
-    - path: data/processed/test_features.npz
+    - path: data/processed/imdb_test_features.npz
       hash: md5
       md5: 5e9417335434ba898f76a5317efcb194
       size: 40236072
-    - path: data/processed/train_features.npz
+    - path: data/processed/imdb_train_features.npz
       hash: md5
       md5: 96f09491c55b9317884ebd484a44ce06
       size: 42015528
@@ -86,7 +94,7 @@ stages:
   train:
     cmd: python mlops_imdb/modeling/train.py
     deps:
-    - path: data/processed/train_features.npz
+    - path: data/processed/imdb_train_features.npz
       hash: md5
       md5: 96f09491c55b9317884ebd484a44ce06
       size: 42015528
@@ -111,7 +119,7 @@ stages:
   eval:
     cmd: python mlops_imdb/modeling/eval.py
     deps:
-    - path: data/processed/test_features.npz
+    - path: data/processed/imdb_test_features.npz
       hash: md5
       md5: 5e9417335434ba898f76a5317efcb194
       size: 40236072
