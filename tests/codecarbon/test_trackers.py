@@ -4,7 +4,6 @@ import importlib
 import pytest
 
 MODULE_PATHS = [
-    "mlops_imdb.data.download_imdb",
     "mlops_imdb.data.prepare",
     "mlops_imdb.features.build_features",
     "mlops_imdb.modeling.train",

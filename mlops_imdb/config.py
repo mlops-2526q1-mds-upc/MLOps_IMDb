@@ -6,6 +6,7 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 from loguru import logger
 import mlflow
+from mlflow.tracking import MlflowClient
 
 # ---------------------------------------------------------------------
 # 1️⃣ Load .env from project root
@@ -51,13 +52,19 @@ def configure_mlflow(experiment_name: str | None = None) -> None:
     """Configure MLflow tracking and experiment using loaded environment variables."""
 
     if not MLFLOW_TRACKING_URI:
-        logger.warning("⚠️  MLFLOW_TRACKING_URI not set — using local file store (./mlruns)")
-        local_uri = f"file:///{(PROJ_ROOT / 'mlruns').as_posix()}"
-        mlflow.set_tracking_uri(local_uri)
+        logger.error("⚠️  MLFLOW_TRACKING_URI not set — using local file store (./mlruns)")
+        raise RuntimeError("MLFLOW_TRACKING_URI is required for MLflow configuration")
     else:
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
-    mlflow.set_experiment(experiment_name or MLFLOW_EXPERIMENT)
+    experiment_to_use = experiment_name or MLFLOW_EXPERIMENT
+
+    client = MlflowClient()
+    existing = client.get_experiment_by_name(experiment_to_use)
+    if existing and existing.lifecycle_stage != "active":
+        client.restore_experiment(existing.experiment_id)
+
+    mlflow.set_experiment(experiment_to_use)
     logger.info(f"MLflow tracking URI: {mlflow.get_tracking_uri()}")
 
 
