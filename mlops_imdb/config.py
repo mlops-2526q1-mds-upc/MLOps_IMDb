@@ -52,7 +52,7 @@ def configure_mlflow(experiment_name: str | None = None) -> None:
     """Configure MLflow tracking and experiment using loaded environment variables."""
 
     if not MLFLOW_TRACKING_URI:
-        logger.error("⚠️  MLFLOW_TRACKING_URI not set — using local file store (./mlruns)")
+        logger.error("MLFLOW_TRACKING_URI is required for MLflow configuration")
         raise RuntimeError("MLFLOW_TRACKING_URI is required for MLflow configuration")
     else:
         mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
