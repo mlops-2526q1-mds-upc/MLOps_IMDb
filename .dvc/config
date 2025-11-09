@@ -1,7 +1,3 @@
-[core]
-    remote = localstore
-['remote "localstore"']
-    url = C:\Users\Utilisateur\Documents\MIRI-AC\Sem-3\MLOPS\dvc_storage
 ['remote "origin"']
     url = s3://dvc
     endpointurl = https://dagshub.com/codemdvd/MLOps_IMDb.s3
