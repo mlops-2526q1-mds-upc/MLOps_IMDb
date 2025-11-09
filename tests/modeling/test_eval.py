@@ -1,4 +1,5 @@
 import json
+import os
 
 import joblib
 import numpy as np
@@ -78,3 +79,25 @@ def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
 
     with open(cm_path, "rb") as fh:
         assert fh.read(8).startswith(b"\x89PNG")
+
+
+def test_last_evaluation_accuracy_threshold():
+    """Test that the last evaluation from mlflow has accuracy above 0.85."""
+    metrics_path = "reports/metrics.json"
+
+    # Check if metrics file exists
+    assert os.path.exists(metrics_path), (
+        f"Metrics file not found at {metrics_path}. " "Please run evaluation first."
+    )
+
+    # Load metrics
+    with open(metrics_path, "r", encoding="utf-8") as fh:
+        metrics = json.load(fh)
+
+    # Check accuracy threshold
+    accuracy = metrics.get("accuracy")
+    assert accuracy is not None, "Accuracy metric not found in metrics.json"
+    assert accuracy > 0.85, (
+        f"Model accuracy {accuracy:.4f} is below the required threshold of 0.85. "
+        "Please retrain the model or adjust features to improve performance."
+    )
