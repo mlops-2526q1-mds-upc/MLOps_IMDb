@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
+from mlops_imdb import config as mlflow_config
 from mlops_imdb.modeling import eval as eval_module
 
 
@@ -39,6 +40,13 @@ def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
     model_path = tmp_path / "model.pkl"
     metrics_path = tmp_path / "reports" / "metrics.json"
     cm_path = tmp_path / "reports" / "figures" / "cm.png"
+    tracking_dir = tmp_path / "mlruns"
+    tracking_dir.mkdir()
+    tracking_uri = tracking_dir.as_uri()
+
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", tracking_uri)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_TRACKING_URI", tracking_uri, raising=False)
+    monkeypatch.setattr(mlflow_config, "MLFLOW_EXPERIMENT", "test-eval", raising=False)
 
     X = sp.csr_matrix([[1.0, 0.0], [0.0, 1.0]])
     sp.save_npz(features_path, X)
