@@ -112,7 +112,17 @@ def main():
                 hidden_dim=train_cfg.get("hidden_dim", 64),
                 dropout=train_cfg.get("dropout", 0.0),
                 padding_idx=pad_idx,
-            ).to(device)
+            )
+
+            try:
+                model = model.to(device)
+            except RuntimeError as exc:
+                if device.type == "cuda":
+                    print(f"[spam_train] CUDA unavailable ({exc}); falling back to CPU.")
+                    device = torch.device("cpu")
+                    model = model.to(device)
+                else:
+                    raise
 
             criterion = nn.BCELoss()
             optimizer = optim.Adam(model.parameters(), lr=train_cfg.get("learning_rate", 0.001))
