@@ -83,3 +83,53 @@ stages:
   train: true
   eval: true
   predict: false
+  spam_prepare: true
+  spam_features: true
+  spam_train: true
+  spam_eval: true
+
+spam:
+  data:
+    raw:
+      train: data/raw/spam_train.parquet
+      test: data/raw/spam_test.parquet
+    processed:
+      train: data/processed/spam_train_clean.csv
+      test: data/processed/spam_test_clean.csv
+    schema:
+      text_col: text
+      label_col: label
+      label_domain: [0, 1]
+      label_mapping:
+        spam: 1
+        not_spam: 0
+  preprocessing:
+    lowercase: true
+    remove_html_tags: true
+    decode_html_entities: true
+    normalize_whitespace: true
+  features:
+    max_len: 50
+    min_freq: 1
+    pad_token: "<PAD>"
+    unk_token: "<UNK>"
+    text_column: clean_text
+    outputs:
+      train_tensor: data/processed/spam_train_features.pt
+      test_tensor: data/processed/spam_test_features.pt
+      vocab_path: models/spam_vocab.json
+  train:
+    embedding_dim: 64
+    hidden_dim: 64
+    dropout: 0.0
+    batch_size: 32
+    epochs: 5
+    learning_rate: 0.001
+    outputs:
+      model_path: models/spam_model.pt
+      training_curve_png: reports/figures/spam_training_loss.png
+  eval:
+    batch_size: 64
+    outputs:
+      metrics_json: reports/spam_metrics.json
+      confusion_matrix_png: reports/figures/spam_confusion_matrix.png
