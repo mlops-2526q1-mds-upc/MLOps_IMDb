@@ -120,7 +120,15 @@ def main():
                 padding_idx=pad_idx,
             )
             model.load_state_dict(state_bundle["model_state"])
-            model.to(device)
+            try:
+                model = model.to(device)
+            except RuntimeError as exc:
+                if device.type == "cuda":
+                    print(f"[spam_eval] CUDA unavailable ({exc}); falling back to CPU.")
+                    device = torch.device("cpu")
+                    model = model.to(device)
+                else:
+                    raise
             model.eval()
 
             data_bundle = load_tensor_bundle(test_tensor_path)
