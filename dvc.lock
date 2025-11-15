@@ -147,3 +147,90 @@ stages:
       hash: md5
       md5: 13a10b5e770b76286317f279b0350f8f
       size: 394
+  spam_prepare:
+    cmd: python mlops_imdb/spam/prepare.py
+    deps:
+    - path: data/raw/spam_test.parquet
+      hash: md5
+      md5: 42c18643c1a1c3f4ab30cee4ddc40ccf
+      size: 654261
+    - path: data/raw/spam_train.parquet
+      hash: md5
+      md5: 4a7360732ebf4a835c63243ff57d54c9
+      size: 1884251
+    - path: mlops_imdb/spam/prepare.py
+      hash: md5
+      md5: 12ff29d8c520096c8f69e5083e5fc8ef
+      size: 3469
+    params:
+      params.yaml:
+        spam.data:
+          raw:
+            train: data/raw/spam_train.parquet
+            test: data/raw/spam_test.parquet
+          processed:
+            train: data/processed/spam_train_clean.csv
+            test: data/processed/spam_test_clean.csv
+          schema:
+            text_col: text
+            label_col: label
+            label_domain:
+            - 0
+            - 1
+            label_mapping:
+              spam: 1
+              not_spam: 0
+        spam.preprocessing:
+          lowercase: true
+          remove_html_tags: true
+          decode_html_entities: true
+          normalize_whitespace: true
+    outs:
+    - path: data/processed/spam_test_clean.csv
+      hash: md5
+      md5: cb6223d2420e73c5797a6f09a5a3d0e4
+      size: 2123006
+    - path: data/processed/spam_train_clean.csv
+      hash: md5
+      md5: 30951f56b863af85bcdf0a2d1d115ed5
+      size: 6133521
+  spam_features:
+    cmd: python mlops_imdb/spam/features.py
+    deps:
+    - path: data/processed/spam_test_clean.csv
+      hash: md5
+      md5: cb6223d2420e73c5797a6f09a5a3d0e4
+      size: 2123006
+    - path: data/processed/spam_train_clean.csv
+      hash: md5
+      md5: 30951f56b863af85bcdf0a2d1d115ed5
+      size: 6133521
+    - path: mlops_imdb/spam/features.py
+      hash: md5
+      md5: e8d9c133a9e9ce4d106fd9b1d175f4ad
+      size: 5333
+    params:
+      params.yaml:
+        spam.features:
+          max_len: 50
+          min_freq: 1
+          pad_token: <PAD>
+          unk_token: <UNK>
+          text_column: clean_text
+          outputs:
+            train_tensor: data/processed/spam_train_features.pt
+            test_tensor: data/processed/spam_test_features.pt
+            vocab_path: models/spam_vocab.json
+    outs:
+    - path: data/processed/spam_test_features.pt
+      hash: md5
+      md5: bdc466ec6087588451e32e6b94ac0c6e
+      size: 1102845
+    - path: data/processed/spam_train_features.pt
+      hash: md5
+      md5: a1a7f63b5fb6e64d00d5511df1ffb965
+      size: 3304645
+    - path: models/spam_vocab.json
+      hash: md5
+      md5: fb4dc202b013b4b11ea36ad8292323dc
+      size: 1042447

@@ -25,6 +25,7 @@ dependencies = [
     "loguru",
     "matplotlib",
     "mlflow>=3.4.0",
+    "nltk>=3.9.2",
     "notebook",
     "numpy",
     "pandas",
@@ -35,6 +36,7 @@ dependencies = [
     "ruff",
     "scikit-learn",
     "seaborn",
+    "torch>=2.9.1",
     "tqdm",
     "typer",
 ]

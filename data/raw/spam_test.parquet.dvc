@@ -1,0 +1,5 @@
+outs:
+- md5: 42c18643c1a1c3f4ab30cee4ddc40ccf
+  size: 654261
+  hash: md5
+  path: spam_test.parquet

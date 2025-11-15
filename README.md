@@ -77,6 +77,24 @@ After running the pipeline, you should see:
 - Evaluation metrics in `reports/metrics.json`
 - Visualization plots in `reports/figures/`
 
+### Spam Detection Pipeline
+
+The sample spam dataset (tracked via DVC as `data/raw/spam_train.parquet` and `data/raw/spam_test.parquet`) follows the same four-stage pattern but trains a PyTorch LSTM classifier. Pull the raw Parquet files and reproduce the spam stages just like the IMDB pipeline:
+
+```bash
+dvc pull -T data/raw/spam_train.parquet data/raw/spam_test.parquet
+dvc repro spam_prepare
+dvc repro spam_features
+dvc repro spam_train
+dvc repro spam_eval
+```
+
+Key spam artifacts:
+- Cleaned CSVs in `data/processed/spam_*_clean.csv`
+- Tensorized datasets in `data/processed/spam_*_features.pt`
+- Vocab + weights in `models/spam_vocab.json` and `models/spam_model.pt`
+- Metrics + plots in `reports/spam_metrics.json` and `reports/figures/spam_confusion_matrix.png`
+
 ### Development Commands
 
 ```bash
@@ -131,6 +149,8 @@ make clean
     ├── __init__.py             <- Makes mlops_imdb a Python module
     │
     ├── config.py               <- Store useful variables and configuration
+    │
+    ├── spam                    <- Spam pipeline modules (prepare/features/train/eval)
     │
     ├── dataset.py              <- Scripts to download or generate data
     │
