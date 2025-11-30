@@ -147,3 +147,180 @@ stages:
       hash: md5
       md5: 13a10b5e770b76286317f279b0350f8f
       size: 394
+  spam_prepare:
+    cmd: python mlops_imdb/spam/prepare.py
+    deps:
+    - path: data/raw/spam_test.parquet
+      hash: md5
+      md5: 42c18643c1a1c3f4ab30cee4ddc40ccf
+      size: 654261
+    - path: data/raw/spam_train.parquet
+      hash: md5
+      md5: 4a7360732ebf4a835c63243ff57d54c9
+      size: 1884251
+    - path: mlops_imdb/spam/prepare.py
+      hash: md5
+      md5: 093880a6cd13d15cae3896198782adbb
+      size: 3468
+    params:
+      params.yaml:
+        spam.data:
+          raw:
+            train: data/raw/spam_train.parquet
+            test: data/raw/spam_test.parquet
+          processed:
+            train: data/processed/spam_train_clean.csv
+            test: data/processed/spam_test_clean.csv
+          schema:
+            text_col: text
+            label_col: label
+            label_domain:
+            - 0
+            - 1
+            label_mapping:
+              spam: 1
+              not_spam: 0
+        spam.preprocessing:
+          lowercase: true
+          remove_html_tags: true
+          decode_html_entities: true
+          normalize_whitespace: true
+    outs:
+    - path: data/processed/spam_test_clean.csv
+      hash: md5
+      md5: cb6223d2420e73c5797a6f09a5a3d0e4
+      size: 2123006
+    - path: data/processed/spam_train_clean.csv
+      hash: md5
+      md5: 30951f56b863af85bcdf0a2d1d115ed5
+      size: 6133521
+  spam_features:
+    cmd: python mlops_imdb/spam/features.py
+    deps:
+    - path: data/processed/spam_test_clean.csv
+      hash: md5
+      md5: cb6223d2420e73c5797a6f09a5a3d0e4
+      size: 2123006
+    - path: data/processed/spam_train_clean.csv
+      hash: md5
+      md5: 30951f56b863af85bcdf0a2d1d115ed5
+      size: 6133521
+    - path: mlops_imdb/spam/features.py
+      hash: md5
+      md5: 02133fcb928bc052a1d925bce2b58c24
+      size: 5332
+    params:
+      params.yaml:
+        spam.features:
+          max_len: 50
+          min_freq: 1
+          pad_token: <PAD>
+          unk_token: <UNK>
+          text_column: clean_text
+          outputs:
+            train_tensor: data/processed/spam_train_features.pt
+            test_tensor: data/processed/spam_test_features.pt
+            vocab_path: models/spam_vocab.json
+    outs:
+    - path: data/processed/spam_test_features.pt
+      hash: md5
+      md5: 69995ec1726a37a4b512f12b6aded8b8
+      size: 1102426
+    - path: data/processed/spam_train_features.pt
+      hash: md5
+      md5: 25bd274ebcfa07c3fb2d0287f48c4542
+      size: 3304224
+    - path: models/spam_vocab.json
+      hash: md5
+      md5: fb4dc202b013b4b11ea36ad8292323dc
+      size: 1042447
+  spam_train:
+    cmd: python mlops_imdb/spam/train.py
+    deps:
+    - path: data/processed/spam_train_features.pt
+      hash: md5
+      md5: 25bd274ebcfa07c3fb2d0287f48c4542
+      size: 3304224
+    - path: mlops_imdb/spam/model.py
+      hash: md5
+      md5: de6fe3f22fe01a79c44b385d7381dc7a
+      size: 1215
+    - path: mlops_imdb/spam/train.py
+      hash: md5
+      md5: 96ecbe2bd75f374e323c8513a8dbea5b
+      size: 9301
+    - path: models/spam_vocab.json
+      hash: md5
+      md5: fb4dc202b013b4b11ea36ad8292323dc
+      size: 1042447
+    params:
+      params.yaml:
+        random_seed: 42
+        spam.train:
+          embedding_dim: 64
+          hidden_dim: 64
+          dropout: 0.0
+          batch_size: 32
+          epochs: 5
+          learning_rate: 0.001
+          outputs:
+            model_path: models/spam_model.pt
+            training_curve_png: reports/figures/spam_training_loss.png
+    outs:
+    - path: models/spam_model.pt
+      hash: md5
+      md5: c30ef3fe59c07edc143b7c4bb7f3a139
+      size: 10714085
+    - path: reports/figures/spam_training_loss.png
+      hash: md5
+      md5: 6c5cf4b6c5a97dc7f265b03d2e209159
+      size: 50055
+  spam_eval:
+    cmd: python mlops_imdb/spam/eval.py
+    deps:
+    - path: data/processed/spam_test_features.pt
+      hash: md5
+      md5: 69995ec1726a37a4b512f12b6aded8b8
+      size: 1102426
+    - path: mlops_imdb/spam/eval.py
+      hash: md5
+      md5: b727a06fdf8391d8c7ea18795f016ca2
+      size: 9355
+    - path: mlops_imdb/spam/model.py
+      hash: md5
+      md5: de6fe3f22fe01a79c44b385d7381dc7a
+      size: 1215
+    - path: models/spam_model.pt
+      hash: md5
+      md5: c30ef3fe59c07edc143b7c4bb7f3a139
+      size: 10714085
+    - path: models/spam_vocab.json
+      hash: md5
+      md5: fb4dc202b013b4b11ea36ad8292323dc
+      size: 1042447
+    params:
+      params.yaml:
+        spam.eval:
+          batch_size: 64
+          outputs:
+            metrics_json: reports/spam_metrics.json
+            confusion_matrix_png: reports/figures/spam_confusion_matrix.png
+        spam.train:
+          embedding_dim: 64
+          hidden_dim: 64
+          dropout: 0.0
+          batch_size: 32
+          epochs: 5
+          learning_rate: 0.001
+          outputs:
+            model_path: models/spam_model.pt
+            training_curve_png: reports/figures/spam_training_loss.png
+    outs:
+    - path: reports/figures/spam_confusion_matrix.png
+      hash: md5
+      md5: 1638ace5c4cc19ef720e6de9fb405657
+      size: 16925
+    - path: reports/spam_metrics.json
+      hash: md5
+      md5: 2ed512b1a0c6f7a72618aaaeec5a652f
+      size: 420

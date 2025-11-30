@@ -1,6 +1,7 @@
 # Data
 *.csv
 *.json
+*.parquet
 !/data/split_info.json
 !/data/.gitignore
 
@@ -207,3 +208,4 @@ emissions.csv
 powermetrics_log.txt
 .vscode/*
 reports/codecarbon_emissions.csv
+*.pt

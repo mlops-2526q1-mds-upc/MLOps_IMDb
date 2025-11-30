@@ -77,6 +77,67 @@ After running the pipeline, you should see:
 - Evaluation metrics in `reports/metrics.json`
 - Visualization plots in `reports/figures/`
 
+### Spam Detection Pipeline
+
+The sample spam dataset (tracked via DVC as `data/raw/spam_train.parquet` and `data/raw/spam_test.parquet`) follows the same four-stage pattern but trains a PyTorch LSTM classifier. Pull the raw Parquet files and reproduce the spam stages just like the IMDB pipeline:
+
+```bash
+dvc pull -T data/raw/spam_train.parquet data/raw/spam_test.parquet
+dvc repro spam_prepare
+dvc repro spam_features
+dvc repro spam_train
+dvc repro spam_eval
+```
+
+Key spam artifacts:
+- Cleaned CSVs in `data/processed/spam_*_clean.csv`
+- Tensorized datasets in `data/processed/spam_*_features.pt`
+- Vocab + weights in `models/spam_vocab.json` and `models/spam_model.pt`
+- Metrics + plots in `reports/spam_metrics.json` and `reports/figures/spam_confusion_matrix.png`
+
+### Spam inference + updater (Docker)
+
+Two containers share a volume: the FastAPI inference service (which downloads from mlflow the latest model with a production tag at startup) and an optional updater daemon that keeps the volume current when a new MLflow run is tagged production.
+
+```bash
+# Build images
+docker build -f deployment/spam/Dockerfile -t spam-api --target spam-api .
+docker build -f deployment/spam/Dockerfile -t spam-model-updater --target spam-model-updater .
+
+# Shared volume for model artifacts
+VOL=spam-model-volume
+
+# Updater: polls MLflow (tags.stage=spam_eval with a production tag) and atomically refreshes the volume
+docker run -d --name spam-model-updater \
+  -v ${VOL}:/shared/models \
+  -e SPAM_MODEL_DIR=/shared/models/spam_model_production \
+  -e SPAM_MODEL_POLL_SECONDS=60 \
+  spam-model-updater
+
+# Inference: downloads the latest model on boot, then serves /predict
+docker run -p 8000:8000 --name spam-api \
+  -v ${VOL}:/shared/models \
+  -e SPAM_MODEL_URI=/shared/models/spam_model_production/spam_model \
+  spam-api
+```
+
+Update behavior:
+- The updater polls MLflow every `SPAM_MODEL_POLL_SECONDS` (default 300s). When it sees a newer `spam_eval` run with a production tag/label, it downloads into a staging folder and atomically swaps into `SPAM_MODEL_DIR`.
+- The inference container only loads the model at startup. After the updater pulls a newer model, restart/roll the inference container to pick up the fresh artifacts.
+
+
+```mermaid
+flowchart TD
+    Host["Host machine"] -->|docker run| Inference["spam-api (uvicorn + download_production_model.py)"]
+    Host -->|docker run| Updater["spam-model-updater (update_model_daemon.py)"]
+    Inference --> Volume["Named volume<br>/shared/models"]
+    Updater --> Volume
+    Updater -->|polls tags.stage=spam_eval + production| MLflow["MLflow tracking URI"]
+    Volume --> ModelPath["/shared/models/spam_model_production/spam_model"]
+    ModelPath --> API["FastAPI /predict"]
+    API --> Client["Client requests"]
+```
+
 ### Development Commands
 
 ```bash
@@ -131,6 +192,8 @@ make clean
     ├── __init__.py             <- Makes mlops_imdb a Python module
     │
     ├── config.py               <- Store useful variables and configuration
+    │
+    ├── spam                    <- Spam pipeline modules (prepare/features/train/eval)
     │
     ├── dataset.py              <- Scripts to download or generate data
     │
