@@ -3,11 +3,16 @@
 from contextlib import nullcontext
 import json
 import os
+from pathlib import Path
+import shutil
+from tempfile import TemporaryDirectory
 from typing import Dict
 
 from codecarbon import EmissionsTracker
 import matplotlib.pyplot as plt
 import mlflow
+from mlflow.models import ModelSignature
+from mlflow.types import ColSpec, DataType, Schema
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -18,6 +23,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import yaml
 
 from mlops_imdb.config import configure_mlflow
+from mlops_imdb.spam.mlflow_model import SpamPyfuncModel
 from mlops_imdb.spam.model import SpamClassifier
 
 
@@ -190,6 +196,54 @@ def main():
                 mlflow.log_artifact(cm_path, artifact_path="spam_eval")
             except Exception:
                 pass
+
+            infer_config = {
+                "pad_token": features_cfg.get("pad_token", "<PAD>"),
+                "unk_token": features_cfg.get("unk_token", "<UNK>"),
+                "max_len": features_cfg.get("max_len", 50),
+                "pad_idx": pad_idx,
+                "embedding_dim": train_cfg.get("embedding_dim", 64),
+                "hidden_dim": train_cfg.get("hidden_dim", 64),
+                "dropout": train_cfg.get("dropout", 0.0),
+                "threshold": train_cfg.get("threshold", 0.5),
+                "preprocess_cfg": spam_cfg.get("preprocessing", {}),
+            }
+
+            signature = ModelSignature(
+                inputs=Schema([ColSpec(DataType.string, "text")]),
+                outputs=Schema([ColSpec(DataType.double, "prediction")]),
+            )
+
+            with TemporaryDirectory() as tmpdir:
+                tmpdir_path = Path(tmpdir)
+                state_path = tmpdir_path / "state_dict.pt"
+                vocab_copy = tmpdir_path / "vocab.json"
+                config_path = tmpdir_path / "config.json"
+                pyfunc_dir = tmpdir_path / "spam_model"
+
+                torch.save(model.state_dict(), state_path)
+                shutil.copy(vocab_path, vocab_copy)
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump(infer_config, f, indent=2)
+
+                mlflow.pyfunc.save_model(
+                    path=str(pyfunc_dir),
+                    python_model=SpamPyfuncModel(),
+                    artifacts={
+                        "state_dict": str(state_path),
+                        "vocab": str(vocab_copy),
+                        "config": str(config_path),
+                    },
+                    signature=signature,
+                    pip_requirements=[
+                        "mlflow",
+                        "torch>=2.9.1",
+                        "pandas",
+                        "pyyaml",
+                        "numpy",
+                    ],
+                )
+                mlflow.log_artifacts(str(pyfunc_dir), artifact_path="spam_model")
 
         emissions = getattr(tracker, "final_emissions", None)
         if emissions is not None:

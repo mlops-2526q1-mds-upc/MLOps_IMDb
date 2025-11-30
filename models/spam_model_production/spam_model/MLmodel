@@ -1,0 +1,33 @@
+flavors:
+  python_function:
+    artifacts:
+      config:
+        path: artifacts/config.json
+        uri: /tmp/tmplbf67_ss/config.json
+      state_dict:
+        path: artifacts/state_dict.pt
+        uri: /tmp/tmplbf67_ss/state_dict.pt
+      vocab:
+        path: artifacts/vocab.json
+        uri: /tmp/tmplbf67_ss/vocab.json
+    cloudpickle_version: 3.1.1
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.12.11
+    streamable: false
+is_signature_from_type_hint: false
+mlflow_version: 3.4.0
+model_id: null
+model_size_bytes: 11757342
+model_uuid: 471819238b9f49d48c3011df9610af6d
+prompts: null
+signature:
+  inputs: '[{"type": "string", "name": "text", "required": true}]'
+  outputs: '[{"type": "double", "name": "prediction", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-11-30 10:15:42.946527'

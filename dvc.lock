@@ -224,12 +224,12 @@ stages:
     outs:
     - path: data/processed/spam_test_features.pt
       hash: md5
-      md5: bdc466ec6087588451e32e6b94ac0c6e
-      size: 1102845
+      md5: 69995ec1726a37a4b512f12b6aded8b8
+      size: 1102426
     - path: data/processed/spam_train_features.pt
       hash: md5
-      md5: a1a7f63b5fb6e64d00d5511df1ffb965
-      size: 3304645
+      md5: 25bd274ebcfa07c3fb2d0287f48c4542
+      size: 3304224
     - path: models/spam_vocab.json
       hash: md5
       md5: fb4dc202b013b4b11ea36ad8292323dc
@@ -239,16 +239,16 @@ stages:
     deps:
     - path: data/processed/spam_train_features.pt
       hash: md5
-      md5: a1a7f63b5fb6e64d00d5511df1ffb965
-      size: 3304645
+      md5: 25bd274ebcfa07c3fb2d0287f48c4542
+      size: 3304224
     - path: mlops_imdb/spam/model.py
       hash: md5
       md5: de6fe3f22fe01a79c44b385d7381dc7a
       size: 1215
     - path: mlops_imdb/spam/train.py
       hash: md5
-      md5: 4c4eb7fff009fc2da6df5b53a2130b3b
-      size: 7017
+      md5: 96ecbe2bd75f374e323c8513a8dbea5b
+      size: 9301
     - path: models/spam_vocab.json
       hash: md5
       md5: fb4dc202b013b4b11ea36ad8292323dc
@@ -269,8 +269,8 @@ stages:
     outs:
     - path: models/spam_model.pt
       hash: md5
-      md5: 587bb749ca949e1ba5246299c72c02a1
-      size: 10714488
+      md5: c30ef3fe59c07edc143b7c4bb7f3a139
+      size: 10714085
     - path: reports/figures/spam_training_loss.png
       hash: md5
       md5: 6c5cf4b6c5a97dc7f265b03d2e209159
@@ -280,20 +280,20 @@ stages:
     deps:
     - path: data/processed/spam_test_features.pt
       hash: md5
-      md5: bdc466ec6087588451e32e6b94ac0c6e
-      size: 1102845
+      md5: 69995ec1726a37a4b512f12b6aded8b8
+      size: 1102426
     - path: mlops_imdb/spam/eval.py
       hash: md5
-      md5: 9b75a670e613710f2bf02ee1c701842d
-      size: 7046
+      md5: b727a06fdf8391d8c7ea18795f016ca2
+      size: 9355
     - path: mlops_imdb/spam/model.py
       hash: md5
       md5: de6fe3f22fe01a79c44b385d7381dc7a
       size: 1215
     - path: models/spam_model.pt
       hash: md5
-      md5: 587bb749ca949e1ba5246299c72c02a1
-      size: 10714488
+      md5: c30ef3fe59c07edc143b7c4bb7f3a139
+      size: 10714085
     - path: models/spam_vocab.json
       hash: md5
       md5: fb4dc202b013b4b11ea36ad8292323dc
