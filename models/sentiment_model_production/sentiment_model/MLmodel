@@ -1,0 +1,27 @@
+flavors:
+  python_function:
+    artifacts:
+      config:
+        path: artifacts\config.json
+        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/config.json
+      model:
+        path: artifacts\model.pkl
+        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/model.pkl
+      vectorizer:
+        path: artifacts\vectorizer.pkl
+        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/vectorizer.pkl
+    cloudpickle_version: 3.1.2
+    code: null
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.12.2
+    streamable: false
+mlflow_version: 3.6.0
+model_id: null
+model_size_bytes: 458863
+model_uuid: 0fce5771249b472f856dfaa4fc914b10
+prompts: null
+utc_time_created: '2025-12-05 14:31:03.447159'
