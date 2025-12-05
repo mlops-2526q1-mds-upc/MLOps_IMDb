@@ -2,11 +2,10 @@
 
 import argparse
 import json
-import os
 import shutil
+import tempfile
 from pathlib import Path
 
-import joblib
 import mlflow.pyfunc
 import yaml
 
@@ -56,14 +55,14 @@ def main():
     args = parse_args()
     params = load_params()
 
-    model_path = args.model_path or params["train"]["outputs"]["model_path"]
-    vectorizer_path = args.vectorizer_path or params["features"]["outputs"]["vectorizer_path"]
+    model_path = Path(args.model_path or params["train"]["outputs"]["model_path"])
+    vectorizer_path = Path(args.vectorizer_path or params["features"]["outputs"]["vectorizer_path"])
     output_dir = Path(args.output_dir)
     model_output = output_dir / "sentiment_model"
 
-    if not Path(model_path).is_file():
+    if not model_path.is_file():
         raise FileNotFoundError(f"Model file not found: {model_path}")
-    if not Path(vectorizer_path).is_file():
+    if not vectorizer_path.is_file():
         raise FileNotFoundError(f"Vectorizer file not found: {vectorizer_path}")
 
     if model_output.exists():
@@ -77,8 +76,6 @@ def main():
             )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    artifacts_dir = output_dir / "artifacts"
-    artifacts_dir.mkdir(exist_ok=True)
 
     preprocess_cfg = params.get("preprocessing", {
         "lowercase": True,
@@ -86,34 +83,42 @@ def main():
         "normalize_whitespace": True,
     })
 
-    config = {
-        "threshold": args.threshold,
-        "preprocess_cfg": preprocess_cfg,
-        "model_type": params.get("train", {}).get("model_type", "logistic_regression"),
-    }
-    config_path = artifacts_dir / "config.json"
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=2)
-    print(f"[save_production_model] Saved config -> {config_path}")
+    # Use a temporary directory for staging artifacts
+    # MLflow will copy these into the model directory with relative paths
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
 
-    model_artifact_path = artifacts_dir / "model.pkl"
-    vectorizer_artifact_path = artifacts_dir / "vectorizer.pkl"
-    shutil.copy(model_path, model_artifact_path)
-    shutil.copy(vectorizer_path, vectorizer_artifact_path)
-    print(f"[save_production_model] Copied model -> {model_artifact_path}")
-    print(f"[save_production_model] Copied vectorizer -> {vectorizer_artifact_path}")
+        # Create config file in temp directory
+        config = {
+            "threshold": args.threshold,
+            "preprocess_cfg": preprocess_cfg,
+            "model_type": params.get("train", {}).get("model_type", "logistic_regression"),
+        }
+        config_path = tmp_path / "config.json"
+        with open(config_path, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2)
 
-    artifacts = {
-        "config": config_path.resolve().as_posix(),
-        "model": model_artifact_path.resolve().as_posix(),
-        "vectorizer": vectorizer_artifact_path.resolve().as_posix(),
-    }
+        # Copy model and vectorizer to temp directory
+        tmp_model_path = tmp_path / "model.pkl"
+        tmp_vectorizer_path = tmp_path / "vectorizer.pkl"
+        shutil.copy(model_path, tmp_model_path)
+        shutil.copy(vectorizer_path, tmp_vectorizer_path)
 
-    mlflow.pyfunc.save_model(
-        path=model_output.resolve().as_posix(),
-        python_model=SentimentPyfuncModel(),
-        artifacts=artifacts,
-    )
+        print(f"[save_production_model] Staged artifacts in temp directory")
+
+        # Pass artifacts from temp directory - MLflow will copy them with relative paths
+        artifacts = {
+            "config": str(config_path),
+            "model": str(tmp_model_path),
+            "vectorizer": str(tmp_vectorizer_path),
+        }
+
+        mlflow.pyfunc.save_model(
+            path=str(model_output),
+            python_model=SentimentPyfuncModel(),
+            artifacts=artifacts,
+        )
+
     print(f"[save_production_model] Saved MLflow pyfunc model -> {model_output}")
     print("[save_production_model] Done.")
 

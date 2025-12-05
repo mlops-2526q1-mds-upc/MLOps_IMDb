@@ -3,13 +3,13 @@ flavors:
     artifacts:
       config:
         path: artifacts\config.json
-        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/config.json
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpflhf4pdo\config.json
       model:
         path: artifacts\model.pkl
-        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/model.pkl
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpflhf4pdo\model.pkl
       vectorizer:
         path: artifacts\vectorizer.pkl
-        uri: C:/Users/Utilisateur/Documents/MIRI-AC/Sem-3/MLOPS/MLOps_IMDb/models/sentiment_model_production/artifacts/vectorizer.pkl
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpflhf4pdo\vectorizer.pkl
     cloudpickle_version: 3.1.2
     code: null
     env:
@@ -22,6 +22,6 @@ flavors:
 mlflow_version: 3.6.0
 model_id: null
 model_size_bytes: 458863
-model_uuid: 0fce5771249b472f856dfaa4fc914b10
+model_uuid: 7c7329315d4e4332a625a2767e765fe8
 prompts: null
-utc_time_created: '2025-12-05 14:31:03.447159'
+utc_time_created: '2025-12-05 15:05:36.393478'
