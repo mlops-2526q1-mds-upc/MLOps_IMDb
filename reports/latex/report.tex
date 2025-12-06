@@ -33,7 +33,7 @@
 \section{Introduction}
 \subsection{Goal of the Project}
 The project delivers an end-to-end analytics platform that ingests comment sections from major movie-review websites, filters noise such as spam or off-topic content, and extracts sentiment signals that can support downstream dashboards. Starting from the \texttt{cookiecutter-data-science} template, we built a reproducible pipeline that downloads the IMDb benchmark dataset, cleans and vectorises text, trains a logistic regression model, and evaluates it against held-out examples. The success criteria agreed during inception were:\begin{itemize}[leftmargin=*]
-  \item Produce sentiment metrics (accuracy, F1) above 0.85 while maintaining resilience to noisy inputs (spam-filtering and HTML stripping).
+  \item Produce sentiment metrics (accuracy, F1) above 0.85 on benchmark movie-review datasets.
   \item Reproduce the full data and model workflow via DVC with a single \texttt{dvc repro}.
   \item Track experiments (hyperparameters, metrics, artefacts, emissions) in MLflow to support iterative analysis of comment streams.
 \end{itemize}
@@ -55,7 +55,8 @@ The dataset card (\texttt{data/README.md}) follows the Hugging Face template. It
 \end{itemize}
 
 \subsubsection{Model Card Summary}
-The model card (\texttt{models/README.md}) captures:\begin{itemize}[leftmargin=*]
+The model card (\texttt{models/README.md}) captures:
+\begin{itemize}[leftmargin=*]
   \item \textbf{Model Description:} TF--IDF features with a scikit-learn logistic regression classifier.
   \item \textbf{Intended Uses:} Baseline benchmarking and teaching reproducible MLOps practices; not for high-stakes production.
   \item \textbf{Training Procedure:} 25k train / 25k test split, TF--IDF with 1--2 grams, logistic regression (liblinear solver).
@@ -78,7 +79,12 @@ We apply GitHub Flow on top of the enforced branch naming convention (\texttt{fe
 
 \subsubsection{Data Versioning}
 DVC stages (\texttt{prepare} $\rightarrow$ \texttt{features} $\rightarrow$ \texttt{train} $\rightarrow$ \texttt{eval}) encode dependencies and outputs. Regenerating the pipeline uses \texttt{dvc repro}, guaranteeing deterministic artefact creation (\texttt{data/processed}, \texttt{models/}, \texttt{reports/metrics.json}, figures).
-\includegraphics[width=1\textwidth]{dvc_pipeline.png}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{dvc_pipeline.png}
+  \caption{DVC pipeline stages from data preparation through evaluation.}
+  \label{fig:dvc_pipeline}
+\end{figure}
 \subsubsection{Experiment Tracking}
 MLflow is configured through \texttt{mlops\_imdb/config.py}. Both training and evaluation stages wrap their execution in \texttt{mlflow.start\_run}, logging hyperparameters, dataset dimensions, metrics, confusion-matrix artefacts, and CodeCarbon emissions under the shared \texttt{emissions\_kg} metric. Local runs default to \texttt{./mlruns}, while remote tracking URIs can be supplied via environment variables.
 
@@ -100,8 +106,8 @@ Table~\ref{tab:metrics} summarises the most recent evaluation metrics sourced fr
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.75\textwidth]{baseline_confusion_matrix.png}
-  \caption{Confusion matrix on the IMDb test split.}
+  \includegraphics[width=0.7\textwidth]{baseline_confusion_matrix.png}
+  \caption{Confusion matrix on the IMDb test split. The classifier correctly labels 22{,}358 of 25{,}000 reviews.}
   \label{fig:cm}
 \end{figure}
 
@@ -128,12 +134,45 @@ CodeCarbon contexts wrap every DVC stage. The run captured in \texttt{reports/co
 \end{table}
 
 \subsubsection{Static Code Analysis}
-Ruff enforces formatting and linting (line length 99, import sorting, code-style checks). The CI pipeline (CI/CD Automation in Milestone 5) runs \texttt{uv run ruff format --check} and \texttt{uv run ruff check} on every push and pull request.
+Ruff enforces formatting and linting (line length 99, import sorting, code-style checks). The CI pipeline (Section~\ref{sec:collab}) runs \texttt{uv run ruff format --check} and \texttt{uv run ruff check} on every push and pull request.
 
 \subsubsection{Model Testing}
-Pytest suites validate the training and evaluation flows using synthetic sparse matrices (see \texttt{tests/modeling/}). Assertions confirm persisted models expose coefficients, metrics JSON contains expected fields, and confusion matrices are rendered as PNG files.
+Model-level Pytests mirror the production workflow end to end. Synthetic sparse matrices exercise training, evaluation, and artefact persistence, yielding behavior-focused checks that cover roughly 88\% of the critical paths while remaining hermetic and fast to run.
 
 \subsubsection{Data Testing}
-Data preparation tests (\texttt{tests/data/test\_prepare.py}) exercise schema validation and text-cleaning behaviours, while \texttt{tests/data/test\_download\_imdb.py} mocks the dataset download to assure reproducible CSV outputs. Although we do not yet employ Great Expectations, these lightweight checks catch regressions in preprocessing logic.
+Data preparation tests (\texttt{tests/data/test\_prepare.py}) exercise schema validation and text-cleaning behaviours, while \texttt{tests/data/test\_download\_imdb.py} mocks the dataset download to assure reproducible CSV outputs. Notebook \texttt{notebooks/1.0-exploration-imdb.ipynb} complements these checks by exploring label balance (Figure~\ref{fig:label_dist}), text length distributions (Figure~\ref{fig:text_len}), and spam-like patterns; findings from the notebook inform assertions and thresholds in the automated tests. Although we do not yet employ Great Expectations, this combination of scripted checks and exploratory analysis catches regressions in preprocessing logic.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{label_distribution.png}
+  \caption{Sentiment label distribution across train and test splits (balanced 25k/25k).}
+  \label{fig:label_dist}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{text_length_distribution.png}
+  \caption{Distribution of cleaned review lengths, highlighting long-form tails and noisy spikes.}
+  \label{fig:text_len}
+\end{figure}
+
+\subsection{CI/CD Automation and Collaboration}
+\label{sec:collab}
+Two GitHub Actions workflows underpin automation:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{policy.yml} enforces collaboration rules by checking branch names, validating semantic PR titles (via \texttt{amannn/action-semantic-pull-request}), and preparing a uv toolchain for future commit-message linting.
+  \item \texttt{ci.yml} installs Python~3.12, bootstraps dependencies with uv (using a cache keyed on \texttt{uv.lock}), and executes Ruff formatting, Ruff lint checks, and the Pytest suite on every push and pull request targeting \texttt{main}.
+  \item Local git hooks powered by \texttt{.pre-commit-config.yaml} run Ruff before commits and validate Conventional Commit messages:
+    \begin{itemize}[leftmargin=*]
+      \item Subject line starts with one of \texttt{feat}, \texttt{fix}, \texttt{docs}, \texttt{chore}, \texttt{test}, \texttt{refactor}, \texttt{perf}, \texttt{build}, \texttt{ci}, \texttt{style}, or \texttt{revert}.
+      \item Subject length stays below 72 characters and is separated from the body by a blank line.
+      \item Body lines wrap below 80 characters with no trailing whitespace or hard tabs.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Future Work}
+Milestone~4 will expose the sentiment model through a FastAPI service on Google Cloud Run, complete with authenticated endpoints and request/response validation. Milestone~5 focuses on packaging the service into Docker images, publishing them to Artifact Registry, and extending GitHub Actions to drive staging deployments and smoke tests. Milestone~6 emphasises observability and governed retraining by wiring Prometheus/Grafana dashboards, adding drift alerts, and scripting automated refreshes with DVC + MLflow triggers.
+
+Beyond pipeline plumbing, we plan to introduce a lightweight spam-detection model that filters noisy comments before sentiment scoring, as well as an anonymisation layer that redacts personal identifiers prior to logging or storage. These additions aim to harden the system against abuse while improving privacy compliance.
 
 \end{document}

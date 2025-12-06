@@ -9,23 +9,36 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.1}Problem Selection and Requirements}{2}{subsubsection.2.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.2}Dataset Card Summary}{2}{subsubsection.2.1.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.3}Model Card Summary}{3}{subsubsection.2.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.4}Project Coordination and Communication}{3}{subsubsection.2.1.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.5}Selection of Cloud Provider}{3}{subsubsection.2.1.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Milestone 2: Model Building -- Reproducibility}{3}{subsection.2.2}\protected@file@percent }
-\newlabel{subsec:milestone2}{{2.2}{3}{Milestone 2: Model Building -- Reproducibility}{subsection.2.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}Project Structure}{3}{subsubsection.2.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Code Versioning}{3}{subsubsection.2.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}Data Versioning}{3}{subsubsection.2.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}Experiment Tracking}{4}{subsubsection.2.2.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces IMDb test performance (logistic regression baseline).}}{4}{table.1}\protected@file@percent }
-\newlabel{tab:metrics}{{1}{4}{IMDb test performance (logistic regression baseline)}{table.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Confusion matrix on the IMDb test split.}}{5}{figure.1}\protected@file@percent }
-\newlabel{fig:cm}{{1}{5}{Confusion matrix on the IMDb test split}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.4}Exploratory Data Analysis}{3}{subsubsection.2.1.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Sentiment label distribution across train and test splits (balanced 25k/25k).}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:label_dist}{{1}{3}{Sentiment label distribution across train and test splits (balanced 25k/25k)}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Distribution of cleaned review lengths, highlighting long-form tails and noisy spikes.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:text_len}{{2}{3}{Distribution of cleaned review lengths, highlighting long-form tails and noisy spikes}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.5}Project Coordination and Communication}{3}{subsubsection.2.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.1.6}Selection of Cloud Provider}{4}{subsubsection.2.1.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Milestone 2: Model Building -- Reproducibility}{4}{subsection.2.2}\protected@file@percent }
+\newlabel{subsec:milestone2}{{2.2}{4}{Milestone 2: Model Building -- Reproducibility}{subsection.2.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.1}Project Structure}{4}{subsubsection.2.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.2}Code Versioning}{4}{subsubsection.2.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.3}Data Versioning}{4}{subsubsection.2.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces DVC pipeline stages from data preparation through evaluation.}}{4}{figure.3}\protected@file@percent }
+\newlabel{fig:dvc_pipeline}{{3}{4}{DVC pipeline stages from data preparation through evaluation}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.2.4}Experiment Tracking}{5}{subsubsection.2.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces IMDb test performance (logistic regression baseline).}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:metrics}{{1}{5}{IMDb test performance (logistic regression baseline)}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Confusion matrix on the IMDb test split. The classifier correctly labels 22{,}358 of 25{,}000 reviews.}}{5}{figure.4}\protected@file@percent }
+\newlabel{fig:cm}{{4}{5}{Confusion matrix on the IMDb test split. The classifier correctly labels 22{,}358 of 25{,}000 reviews}{figure.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Milestone 3: Model Building -- Quality Assurance}{5}{subsection.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.1}Energy Efficiency Awareness}{5}{subsubsection.2.3.1}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces CodeCarbon emissions per stage (mg CO\(_2\)eq).}}{5}{table.2}\protected@file@percent }
-\newlabel{tab:carbon}{{2}{5}{CodeCarbon emissions per stage (mg CO\(_2\)eq)}{table.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}Static Code Analysis}{5}{subsubsection.2.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces CodeCarbon emissions per stage (mg CO\(_2\)eq).}}{6}{table.2}\protected@file@percent }
+\newlabel{tab:carbon}{{2}{6}{CodeCarbon emissions per stage (mg CO\(_2\)eq)}{table.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.2}Static Code Analysis}{6}{subsubsection.2.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.3}Model Testing}{6}{subsubsection.2.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {2.3.4}Data Testing}{6}{subsubsection.2.3.4}\protected@file@percent }
-\gdef \@abspage@last{7}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}CI/CD Automation and Collaboration}{6}{subsection.2.4}\protected@file@percent }
+\newlabel{sec:collab}{{2.4}{6}{CI/CD Automation and Collaboration}{subsection.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Monitoring and Feedback Loops}{6}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Self-Evaluation and Lessons Learned}{7}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Retrospective}{7}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Knowledge Integration}{7}{subsection.3.2}\protected@file@percent }
+\gdef \@abspage@last{8}

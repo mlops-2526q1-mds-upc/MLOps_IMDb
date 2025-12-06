@@ -1,8 +1,10 @@
 # Fdb version 4
-["pdflatex"] 1760383512.78518 "report.tex" "report.pdf" "report" 1760383513.30818 0
+["pdflatex"] 1760385096.52222 "report.tex" "report.pdf" "report" 1760385097.17309 0
   "../figures/baseline_confusion_matrix.png" 1760360351.52468 15243 0d99a314dadd0f61d72248524a966c53 ""
-  "../figures/dvc_pipeline.png" 1760364442.12663 172815 9a593cac8e095272fbf9036525a3ba62 ""
-  "../figures/fib-upc-logo.png" 1760382012.25334 5906 f86fb9794dc3859d61559da41a3a3805 ""
+  "../figures/dvc_pipeline.png" 1760384313.70089 172815 9a593cac8e095272fbf9036525a3ba62 ""
+  "../figures/fib-upc-logo.png" 1760384313.7015 5906 f86fb9794dc3859d61559da41a3a3805 ""
+  "../figures/label_distribution.png" 1760301947.4906 26668 813a395922b4e3f5520e652bf3ae524d ""
+  "../figures/text_length_distribution.png" 1760301947.49103 64566 5a71a69d4dcc10ee512382fdaccd8674 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/tfm/jknappen/ec/tcrm1095.tfm" 1136768653 1536 02c06700a42be0f5a28664c7273f82e7 ""
@@ -97,10 +99,10 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1760352227 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1760352193 3345728 28d974354e97eb7f6a97d9835a2c2f11 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "report.aux" 1760383513.27133 3576 c23c2460dbb83011b606cea8aafdb560 "pdflatex"
-  "report.out" 1760383513.27194 3473 980a5c072677dfe8cb7792a582b0716f "pdflatex"
-  "report.tex" 1760383510.29802 8950 05cdc4592d08de98b300faa1aadfe69c ""
-  "report.toc" 1760383513.2721 1797 599048f7205df3a5a37ac514500a61dd "pdflatex"
+  "report.aux" 1760385097.13436 5507 9fd7997f2ba391839a98a6ddb84a8c85 "pdflatex"
+  "report.out" 1760385097.13515 4638 b927d130b59a01c0af1fc9cb548dd5b1 "pdflatex"
+  "report.tex" 1760384881.71476 12306 8952d9a7eb759f1405121aa01d0277f6 ""
+  "report.toc" 1760385097.13543 2350 be42c1cfdff35292f2668136018adb49 "pdflatex"
   (generated)
   "report.aux"
   "report.log"

@@ -5,15 +5,21 @@
 \contentsline {subsubsection}{\numberline {2.1.1}Problem Selection and Requirements}{2}{subsubsection.2.1.1}%
 \contentsline {subsubsection}{\numberline {2.1.2}Dataset Card Summary}{2}{subsubsection.2.1.2}%
 \contentsline {subsubsection}{\numberline {2.1.3}Model Card Summary}{3}{subsubsection.2.1.3}%
-\contentsline {subsubsection}{\numberline {2.1.4}Project Coordination and Communication}{3}{subsubsection.2.1.4}%
-\contentsline {subsubsection}{\numberline {2.1.5}Selection of Cloud Provider}{3}{subsubsection.2.1.5}%
-\contentsline {subsection}{\numberline {2.2}Milestone 2: Model Building -- Reproducibility}{3}{subsection.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.1}Project Structure}{3}{subsubsection.2.2.1}%
-\contentsline {subsubsection}{\numberline {2.2.2}Code Versioning}{3}{subsubsection.2.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.3}Data Versioning}{3}{subsubsection.2.2.3}%
-\contentsline {subsubsection}{\numberline {2.2.4}Experiment Tracking}{4}{subsubsection.2.2.4}%
+\contentsline {subsubsection}{\numberline {2.1.4}Exploratory Data Analysis}{3}{subsubsection.2.1.4}%
+\contentsline {subsubsection}{\numberline {2.1.5}Project Coordination and Communication}{3}{subsubsection.2.1.5}%
+\contentsline {subsubsection}{\numberline {2.1.6}Selection of Cloud Provider}{4}{subsubsection.2.1.6}%
+\contentsline {subsection}{\numberline {2.2}Milestone 2: Model Building -- Reproducibility}{4}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Project Structure}{4}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Code Versioning}{4}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Data Versioning}{4}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Experiment Tracking}{5}{subsubsection.2.2.4}%
 \contentsline {subsection}{\numberline {2.3}Milestone 3: Model Building -- Quality Assurance}{5}{subsection.2.3}%
 \contentsline {subsubsection}{\numberline {2.3.1}Energy Efficiency Awareness}{5}{subsubsection.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.3.2}Static Code Analysis}{5}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.2}Static Code Analysis}{6}{subsubsection.2.3.2}%
 \contentsline {subsubsection}{\numberline {2.3.3}Model Testing}{6}{subsubsection.2.3.3}%
 \contentsline {subsubsection}{\numberline {2.3.4}Data Testing}{6}{subsubsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.4}CI/CD Automation and Collaboration}{6}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Monitoring and Feedback Loops}{6}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Self-Evaluation and Lessons Learned}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Retrospective}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Knowledge Integration}{7}{subsection.3.2}%
