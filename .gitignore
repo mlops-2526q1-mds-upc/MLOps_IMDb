@@ -157,8 +157,6 @@ ENV/
 env.bak/
 venv.bak/
 
-uv.lock
-
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -216,3 +214,6 @@ statements/
 .vscode/
 
 *.ptreports/*.bak
+reports/codecarbon_emissions.csv
+reports/figures/baseline_confusion_matrix.png
+reports/metrics.json
