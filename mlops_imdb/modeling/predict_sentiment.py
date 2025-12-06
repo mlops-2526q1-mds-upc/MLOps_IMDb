@@ -31,15 +31,15 @@ def main():
     model = mlflow.pyfunc.load_model(model_uri)
     df = pd.DataFrame({"text": [args.text]})
     proba = model.predict(df)
-    
+
     if hasattr(proba, "__len__"):
         proba_value = float(proba[0])
     else:
         proba_value = float(proba)
-    
+
     label = int(proba_value >= 0.5)
     sentiment = "positive" if label == 1 else "negative"
-    
+
     print(f"Sentiment: {sentiment}")
     print(f"Probability (positive): {proba_value:.6f}")
     print(f"Label: {label}")
@@ -47,4 +47,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

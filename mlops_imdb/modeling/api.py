@@ -11,8 +11,7 @@ import pandas as pd
 from pydantic import BaseModel, Field
 
 DEFAULT_MODEL_URI = os.getenv(
-    "SENTIMENT_MODEL_URI", 
-    "models/sentiment_model_production/sentiment_model"
+    "SENTIMENT_MODEL_URI", "models/sentiment_model_production/sentiment_model"
 )
 
 
@@ -21,18 +20,9 @@ class PredictRequest(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    probability: float = Field(
-        ..., 
-        description="Positive sentiment probability between 0 and 1."
-    )
-    label: int = Field(
-        ..., 
-        description="Predicted label (1=positive, 0=negative)."
-    )
-    sentiment: str = Field(
-        ..., 
-        description="Human-readable sentiment (positive/negative)."
-    )
+    probability: float = Field(..., description="Positive sentiment probability between 0 and 1.")
+    label: int = Field(..., description="Predicted label (1=positive, 0=negative).")
+    sentiment: str = Field(..., description="Human-readable sentiment (positive/negative).")
 
 
 def _resolve_model_uri(uri: str) -> str:
@@ -74,4 +64,3 @@ def predict(payload: PredictRequest):
 def health():
     """Health check endpoint."""
     return {"status": "ok", "model_uri": DEFAULT_MODEL_URI}
-

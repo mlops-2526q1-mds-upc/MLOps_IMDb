@@ -2,9 +2,9 @@
 
 import argparse
 import json
+from pathlib import Path
 import shutil
 import tempfile
-from pathlib import Path
 
 import mlflow.pyfunc
 import yaml
@@ -56,7 +56,9 @@ def main():
     params = load_params()
 
     model_path = Path(args.model_path or params["train"]["outputs"]["model_path"])
-    vectorizer_path = Path(args.vectorizer_path or params["features"]["outputs"]["vectorizer_path"])
+    vectorizer_path = Path(
+        args.vectorizer_path or params["features"]["outputs"]["vectorizer_path"]
+    )
     output_dir = Path(args.output_dir)
     model_output = output_dir / "sentiment_model"
 
@@ -71,17 +73,19 @@ def main():
             shutil.rmtree(model_output)
         else:
             raise FileExistsError(
-                f"Output directory already exists: {model_output}. "
-                "Use --force to overwrite."
+                f"Output directory already exists: {model_output}. Use --force to overwrite."
             )
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    preprocess_cfg = params.get("preprocessing", {
-        "lowercase": True,
-        "remove_html_tags": True,
-        "normalize_whitespace": True,
-    })
+    preprocess_cfg = params.get(
+        "preprocessing",
+        {
+            "lowercase": True,
+            "remove_html_tags": True,
+            "normalize_whitespace": True,
+        },
+    )
 
     # Use a temporary directory for staging artifacts
     # MLflow will copy these into the model directory with relative paths
@@ -104,7 +108,7 @@ def main():
         shutil.copy(model_path, tmp_model_path)
         shutil.copy(vectorizer_path, tmp_vectorizer_path)
 
-        print(f"[save_production_model] Staged artifacts in temp directory")
+        print("[save_production_model] Staged artifacts in temp directory")
 
         # Pass artifacts from temp directory - MLflow will copy them with relative paths
         artifacts = {
@@ -125,4 +129,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

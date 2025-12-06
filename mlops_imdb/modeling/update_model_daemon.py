@@ -31,7 +31,9 @@ def is_up_to_date(target_dir: Path, latest_run_start_ms: int) -> bool:
 
 
 def main():
-    target_dir = Path(os.getenv("SENTIMENT_MODEL_DIR", "models/sentiment_model_production")).expanduser()
+    target_dir = Path(
+        os.getenv("SENTIMENT_MODEL_DIR", "models/sentiment_model_production")
+    ).expanduser()
     staging_dir = target_dir.parent / ".sentiment_model_staging"
 
     while True:
