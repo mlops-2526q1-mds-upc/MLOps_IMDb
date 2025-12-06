@@ -208,4 +208,11 @@ emissions.csv
 powermetrics_log.txt
 .vscode/*
 reports/codecarbon_emissions.csv
+
+*.pt
+
+statements/
+
+.vscode/
+
 *.ptreports/*.bak

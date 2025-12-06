@@ -7,14 +7,17 @@ stages:
       hash: md5
       md5: 0b6a6e22790570c21fc32211b41578c3
       size: 32540147
+      isexec: true
     - path: data/raw/imdb_train.csv
       hash: md5
       md5: dc4c040dd7f3bfb42a279cb1f73725d5
       size: 33322167
+      isexec: true
     - path: mlops_imdb/data/prepare.py
       hash: md5
       md5: b31960536d19dc776da4838f0d64e392
       size: 4581
+      isexec: true
     params:
       params.yaml:
         data:
@@ -42,27 +45,32 @@ stages:
     outs:
     - path: data/processed/imdb_test_clean.csv
       hash: md5
-      md5: 5d0e8e3b8155ad7156fce9c9a496e544
-      size: 31980226
+      md5: c96b5d7197046d5d1c9b16fb9580c898
+      size: 32005227
+      isexec: true
     - path: data/processed/imdb_train_clean.csv
       hash: md5
-      md5: 569148bf4dbc190c707a8798b0c27b85
-      size: 32751855
+      md5: 1da332c8b46ee244eeaddd255532af0d
+      size: 32776856
+      isexec: true
   features:
     cmd: python mlops_imdb/features/build_features.py
     deps:
     - path: data/processed/imdb_test_clean.csv
       hash: md5
-      md5: 5d0e8e3b8155ad7156fce9c9a496e544
-      size: 31980226
+      md5: c96b5d7197046d5d1c9b16fb9580c898
+      size: 32005227
+      isexec: true
     - path: data/processed/imdb_train_clean.csv
       hash: md5
-      md5: 569148bf4dbc190c707a8798b0c27b85
-      size: 32751855
+      md5: 1da332c8b46ee244eeaddd255532af0d
+      size: 32776856
+      isexec: true
     - path: mlops_imdb/features/build_features.py
       hash: md5
       md5: 04914a97a59a5bf5496c4fdfde8ff1de
       size: 3318
+      isexec: true
     params:
       params.yaml:
         features:
@@ -81,27 +89,32 @@ stages:
     outs:
     - path: data/processed/imdb_test_features.npz
       hash: md5
-      md5: 5e9417335434ba898f76a5317efcb194
-      size: 40236072
+      md5: 52abcd227bf646af57f579105fbcec89
+      size: 40230615
+      isexec: true
     - path: data/processed/imdb_train_features.npz
       hash: md5
-      md5: 96f09491c55b9317884ebd484a44ce06
-      size: 42015528
+      md5: 12e54f6cb3997b8831677b067a484289
+      size: 42017550
+      isexec: true
     - path: models/tfidf_vectorizer.pkl
       hash: md5
-      md5: cee7e8b181ed9a640971938c9bff2b62
-      size: 377522
+      md5: 23cb7631e3690c0fe78bf636c418a9d6
+      size: 377517
+      isexec: true
   train:
     cmd: python mlops_imdb/modeling/train.py
     deps:
     - path: data/processed/imdb_train_features.npz
       hash: md5
-      md5: 96f09491c55b9317884ebd484a44ce06
-      size: 42015528
+      md5: 12e54f6cb3997b8831677b067a484289
+      size: 42017550
+      isexec: true
     - path: mlops_imdb/modeling/train.py
       hash: md5
-      md5: 0ce55c548eec9b2d669803e8bb878f32
-      size: 3836
+      md5: 134dc60a6cc8d752a378d448ebc793c8
+      size: 3950
+      isexec: true
     params:
       params.yaml:
         train:
@@ -114,23 +127,27 @@ stages:
     outs:
     - path: models/model.pkl
       hash: md5
-      md5: 91d519d504b11a7cb3629b99ecff0f84
+      md5: d24f5929d26e5a76a24c3acd17199553
       size: 80891
+      isexec: true
   eval:
     cmd: python mlops_imdb/modeling/eval.py
     deps:
     - path: data/processed/imdb_test_features.npz
       hash: md5
-      md5: 5e9417335434ba898f76a5317efcb194
-      size: 40236072
+      md5: 52abcd227bf646af57f579105fbcec89
+      size: 40230615
+      isexec: true
     - path: mlops_imdb/modeling/eval.py
       hash: md5
-      md5: 55546809a8ba35f06132c55c530e9add
-      size: 5644
+      md5: 2d1392313eab6f8fb1910e2ac51f1bd4
+      size: 5813
+      isexec: true
     - path: models/model.pkl
       hash: md5
-      md5: 91d519d504b11a7cb3629b99ecff0f84
+      md5: d24f5929d26e5a76a24c3acd17199553
       size: 80891
+      isexec: true
     params:
       params.yaml:
         eval:
@@ -145,8 +162,9 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 13a10b5e770b76286317f279b0350f8f
-      size: 394
+      md5: 060cf8d356116507c505667ab1a1fa71
+      size: 405
+      isexec: true
   spam_prepare:
     cmd: python mlops_imdb/spam/prepare.py
     deps:
