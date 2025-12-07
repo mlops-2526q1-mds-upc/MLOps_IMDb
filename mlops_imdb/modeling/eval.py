@@ -4,11 +4,20 @@
 from contextlib import nullcontext
 import json
 import os
+import shutil
+import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from codecarbon import EmissionsTracker
 import joblib
 import matplotlib.pyplot as plt
 import mlflow
+from mlflow.models import ModelSignature
+from mlflow.types import ColSpec, DataType, Schema
 import pandas as pd
 import scipy.sparse as sp
 from sklearn.metrics import (
@@ -19,6 +28,7 @@ from sklearn.metrics import (
 import yaml
 
 from mlops_imdb.config import configure_mlflow
+from mlops_imdb.modeling.mlflow_model import SentimentPyfuncModel
 
 
 def load_params(path: str = "params.yaml") -> dict:
@@ -149,7 +159,6 @@ def main():
                 json.dump(payload, f, indent=2)
             print(f"[eval] Saved metrics -> {metrics_json}")
             print(f"[eval] Saved confusion matrix -> {cm_png}")
-            # Log artifacts to MLflow
             try:
                 mlflow.log_artifact(metrics_json, artifact_path="eval")
             except Exception:
@@ -158,11 +167,57 @@ def main():
                 mlflow.log_artifact(cm_png, artifact_path="eval")
             except Exception:
                 pass
-            try:
-                mlflow.log_artifact(model_path, artifact_path="model")
-                print(f"[eval] Logged model artifact -> {model_path}")
-            except Exception:
-                pass
+
+            vectorizer_path = features_out["vectorizer_path"]
+            preprocess_cfg = params.get("preprocessing", {
+                "lowercase": True,
+                "remove_html_tags": True,
+                "normalize_whitespace": True,
+            })
+
+            infer_config = {
+                "threshold": 0.5,
+                "preprocess_cfg": preprocess_cfg,
+                "model_type": params.get("train", {}).get("model_type", "logistic_regression"),
+            }
+
+            signature = ModelSignature(
+                inputs=Schema([ColSpec(DataType.string, "text")]),
+                outputs=Schema([ColSpec(DataType.double, "prediction")]),
+            )
+
+            with TemporaryDirectory() as tmpdir:
+                tmpdir_path = Path(tmpdir)
+                config_path = tmpdir_path / "config.json"
+                model_copy = tmpdir_path / "model.pkl"
+                vectorizer_copy = tmpdir_path / "vectorizer.pkl"
+                pyfunc_dir = tmpdir_path / "sentiment_model"
+
+                with open(config_path, "w", encoding="utf-8") as f:
+                    json.dump(infer_config, f, indent=2)
+                shutil.copy(model_path, model_copy)
+                shutil.copy(vectorizer_path, vectorizer_copy)
+
+                mlflow.pyfunc.save_model(
+                    path=str(pyfunc_dir),
+                    python_model=SentimentPyfuncModel(),
+                    artifacts={
+                        "config": str(config_path),
+                        "model": str(model_copy),
+                        "vectorizer": str(vectorizer_copy),
+                    },
+                    signature=signature,
+                    pip_requirements=[
+                        "mlflow",
+                        "scikit-learn",
+                        "pandas",
+                        "pyyaml",
+                        "numpy",
+                        "joblib",
+                    ],
+                )
+                mlflow.log_artifacts(str(pyfunc_dir), artifact_path="sentiment_model")
+                print("[eval] Logged sentiment pyfunc model to MLflow artifacts")
 
         emissions = getattr(tracker, "final_emissions", None)
         if emissions is not None:
