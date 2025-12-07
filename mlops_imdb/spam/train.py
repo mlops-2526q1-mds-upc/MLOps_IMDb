@@ -182,7 +182,9 @@ def main():
                     best_accuracy = accuracy
                     best_epoch = epoch
                     best_model_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
-                    print(f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f} [NEW BEST]")
+                    print(
+                        f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f} [NEW BEST]"
+                    )
                 else:
                     print(f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f}")
 
@@ -192,7 +194,9 @@ def main():
             # Restore best model weights
             if best_model_state is not None:
                 model.load_state_dict(best_model_state)
-                print(f"[spam_train] Restored best model from epoch {best_epoch} (Acc {best_accuracy:.4f})")
+                print(
+                    f"[spam_train] Restored best model from epoch {best_epoch} (Acc {best_accuracy:.4f})"
+                )
                 mlflow.log_metric("best_epoch", best_epoch)
                 mlflow.log_metric("best_accuracy", best_accuracy)
 
