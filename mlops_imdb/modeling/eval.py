@@ -75,15 +75,12 @@ def save_confusion_matrix_png(cm, out_path: str, labels=(0, 1)) -> None:
 def main():
     params = load_params()
 
-    # Configure MLflow (env or params)
     mlflow_cfg = params.get("mlflow", {})
     configure_mlflow(mlflow_cfg.get("experiment_name"))
 
-    # Start MLflow run and energy tracker
     with mlflow.start_run(run_name="evaluate_model"):
         mlflow.set_tag("stage", "eval")
         with create_tracker(params, "evaluate_model") as tracker:
-            # Paths and schema
             data_cfg = params["data"]
             schema = data_cfg.get(
                 "schema",
@@ -99,28 +96,22 @@ def main():
                 "confusion_matrix_png", "reports/figures/baseline_confusion_matrix.png"
             )
 
-            # Inputs
             X_test_path = features_out["test_features"]
             test_csv_path = data_cfg["processed"]["test"]
             model_path = params["train"]["outputs"]["model_path"]
 
-            # Load data
             X_test = sp.load_npz(X_test_path)
             y_test = pd.read_csv(test_csv_path)[label_col].astype(int).values
 
-            # Load model
             model = joblib.load(model_path)
 
-            # Predict
             y_pred = model.predict(X_test)
 
-            # Metrics
             acc = accuracy_score(y_test, y_pred)
             precision, recall, f1, _ = precision_recall_fscore_support(
                 y_test, y_pred, average="binary", pos_label=1, zero_division=0
             )
 
-            # Log metrics to MLflow
             mlflow.log_metrics(
                 {
                     "accuracy": float(acc),
@@ -136,11 +127,9 @@ def main():
                 }
             )
 
-            # Confusion matrix
             cm = confusion_matrix(y_test, y_pred, labels=label_domain)
             save_confusion_matrix_png(cm, cm_png, labels=tuple(label_domain))
 
-            # Persist metrics JSON
             ensure_dir(metrics_json)
             payload = {
                 "accuracy": float(acc),
