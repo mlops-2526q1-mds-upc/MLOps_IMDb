@@ -5,6 +5,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from mlops_imdb import config as mlflow_config
 from mlops_imdb.modeling import eval as eval_module
@@ -38,6 +39,7 @@ def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
     features_path = tmp_path / "imdb_test_features.npz"
     test_csv = tmp_path / "imdb_test_clean.csv"
     model_path = tmp_path / "model.pkl"
+    vectorizer_path = tmp_path / "vectorizer.pkl"
     metrics_path = tmp_path / "reports" / "metrics.json"
     cm_path = tmp_path / "reports" / "figures" / "cm.png"
     tracking_dir = tmp_path / "mlruns"
@@ -52,13 +54,20 @@ def test_main_writes_metrics_and_confusion_matrix(tmp_path, monkeypatch):
     sp.save_npz(features_path, X)
     pd.DataFrame({"label": [1, 0]}).to_csv(test_csv, index=False)
     joblib.dump(DummyModel([1, 0]), model_path)
+    dummy_vectorizer = TfidfVectorizer()
+    joblib.dump(dummy_vectorizer, vectorizer_path)
 
     params = {
         "data": {
             "processed": {"test": str(test_csv)},
             "schema": {"label_col": "label", "label_domain": [0, 1]},
         },
-        "features": {"outputs": {"test_features": str(features_path)}},
+        "features": {
+            "outputs": {
+                "test_features": str(features_path),
+                "vectorizer_path": str(vectorizer_path),
+            }
+        },
         "train": {"outputs": {"model_path": str(model_path)}},
         "eval": {
             "outputs": {
