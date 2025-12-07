@@ -157,11 +157,14 @@ def main():
             except Exception:
                 pass
             vectorizer_path = features_out["vectorizer_path"]
-            preprocess_cfg = params.get("preprocessing", {
-                "lowercase": True,
-                "remove_html_tags": True,
-                "normalize_whitespace": True,
-            })
+            preprocess_cfg = params.get(
+                "preprocessing",
+                {
+                    "lowercase": True,
+                    "remove_html_tags": True,
+                    "normalize_whitespace": True,
+                },
+            )
 
             infer_config = {
                 "threshold": 0.5,
