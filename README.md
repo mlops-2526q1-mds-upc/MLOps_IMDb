@@ -138,6 +138,22 @@ flowchart TD
     API --> Client["Client requests"]
 ```
 
+### Docker Compose (spam + sentiment)
+
+Bring up both APIs plus their updater daemons with a single command:
+
+```bash
+cp example.env .env  # fill in MLflow credentials
+docker compose -f deployment/docker-compose.yml up --build -d
+```
+
+- Spam API -> `http://localhost:8000` using volume `spam-models`
+- Sentiment API -> `http://localhost:8001` using volume `sentiment-models`
+- UI (Streamlit) -> `http://localhost:8501` (talks to both APIs via service names)
+- Override poll cadence via `SPAM_MODEL_POLL_SECONDS` or `SENTIMENT_MODEL_POLL_SECONDS`
+- Each pair shares a private network (`spam-net`, `sentiment-net`) so updater and API can talk directly if needed
+- Stop everything with `docker compose -f deployment/docker-compose.yml down`
+
 ### Development Commands
 
 ```bash

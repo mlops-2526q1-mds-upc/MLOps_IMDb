@@ -2,26 +2,26 @@ flavors:
   python_function:
     artifacts:
       config:
-        path: artifacts/config.json
-        uri: /tmp/tmpiy1vge_6/config.json
+        path: artifacts\config.json
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpsjgja9kz\artifacts\config.json
       model:
-        path: artifacts/model.pkl
-        uri: /tmp/tmpiy1vge_6/model.pkl
+        path: artifacts\model.pkl
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpsjgja9kz\artifacts\model.pkl
       vectorizer:
-        path: artifacts/vectorizer.pkl
-        uri: /tmp/tmpiy1vge_6/vectorizer.pkl
-    cloudpickle_version: 3.1.1
+        path: artifacts\vectorizer.pkl
+        uri: C:\Users\UTILIS~1\AppData\Local\Temp\tmpsjgja9kz\artifacts\vectorizer.pkl
+    cloudpickle_version: 3.1.2
     code: null
     env:
       conda: conda.yaml
       virtualenv: python_env.yaml
     loader_module: mlflow.pyfunc.model
     python_model: python_model.pkl
-    python_version: 3.12.3
+    python_version: 3.12.2
     streamable: false
-mlflow_version: 3.4.0
+mlflow_version: 3.6.0
 model_id: null
-model_size_bytes: 458852
-model_uuid: 762901e145c84e4daeb31c9d0ffcf850
+model_size_bytes: 458863
+model_uuid: 3db1e0cdf2dd4caf8dedacb03dbdd25d
 prompts: null
-utc_time_created: '2025-12-05 18:48:16.137694'
+utc_time_created: '2025-12-07 12:50:12.980308'

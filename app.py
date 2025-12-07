@@ -1,10 +1,11 @@
+import os
 from typing import Any, Dict, Optional, Tuple
 
 import requests
 import streamlit as st
 
-SPAM_ENDPOINT = "https://mlops-imdb-spam-991751526244.europe-west1.run.app/predict"
-SENTIMENT_ENDPOINT = None  # Not implemented yet
+SPAM_ENDPOINT = os.getenv("SPAM_ENDPOINT")
+SENTIMENT_ENDPOINT = os.getenv("SENTIMENT_ENDPOINT") or None  # Not implemented yet
 
 
 def call_model(endpoint: str, text: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
@@ -31,14 +32,9 @@ def extract_label_and_proba(result: Dict[str, Any]) -> Tuple[Optional[str], Opti
         label = str(label)
 
     # --- Probability extraction ---
-    proba_keys = ["spam_probability", "probability", "proba", "score", "spam_proba", "spam_score"]
     proba = None
-    for key in proba_keys:
-        if key in result:
-            proba = result[key]
-            break
+    proba = result["probability"] if "probability" in result else proba
 
-    # If probability is a dict (e.g. {"spam": 0.9, "ham": 0.1})
     if isinstance(proba, dict) and proba:
         # Prefer explicit "spam" key if present
         if "spam" in proba:

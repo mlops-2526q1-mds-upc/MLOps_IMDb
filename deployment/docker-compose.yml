@@ -1,0 +1,100 @@
+
+services:
+  spam-model-updater:
+    build:
+      context: ..
+      dockerfile: deployment/spam/Dockerfile
+      target: spam-model-updater
+    env_file:
+      - ../.env
+    environment:
+      SPAM_MODEL_DIR: /shared/models/spam_model_production
+      SPAM_MODEL_POLL_SECONDS: ${SPAM_MODEL_POLL_SECONDS:-300}
+    volumes:
+      - spam-models:/shared/models
+    networks:
+      - spam-net
+    restart: unless-stopped
+
+  spam-api:
+    build:
+      context: ..
+      dockerfile: deployment/spam/Dockerfile
+      target: spam-api
+    env_file:
+      - ../.env
+    environment:
+      SPAM_MODEL_URI: /shared/models/spam_model_production/spam_model
+    volumes:
+      - spam-models:/shared/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      - spam-model-updater
+    networks:
+      - spam-net
+    restart: unless-stopped
+
+  sentiment-model-updater:
+    build:
+      context: ..
+      dockerfile: deployment/sentiment/Dockerfile
+      target: sentiment-model-updater
+    env_file:
+      - ../.env
+    environment:
+      SENTIMENT_MODEL_DIR: /shared/models/sentiment_model_production
+      SENTIMENT_MODEL_POLL_SECONDS: ${SENTIMENT_MODEL_POLL_SECONDS:-300}
+    volumes:
+      - sentiment-models:/shared/models
+    networks:
+      - sentiment-net
+    restart: unless-stopped
+
+  sentiment-api:
+    build:
+      context: ..
+      dockerfile: deployment/sentiment/Dockerfile
+      target: sentiment-api
+    env_file:
+      - ../.env
+    environment:
+      SENTIMENT_MODEL_URI: /shared/models/sentiment_model_production/sentiment_model
+    volumes:
+      - sentiment-models:/shared/models
+    ports:
+      - "8001:8000"
+    depends_on:
+      - sentiment-model-updater
+    networks:
+      - sentiment-net
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: ..
+      dockerfile: deployment/sentiment/Dockerfile
+      target: runtime-base
+    env_file:
+      - ../.env
+    environment:
+      SPAM_ENDPOINT: http://spam-api:8000/predict
+      SENTIMENT_ENDPOINT: http://sentiment-api:8000/predict
+    ports:
+      - "8501:8501"
+    depends_on:
+      - spam-api
+      - sentiment-api
+    networks:
+      - spam-net
+      - sentiment-net
+    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    restart: unless-stopped
+
+volumes:
+  spam-models:
+  sentiment-models:
+
+networks:
+  spam-net:
+  sentiment-net:

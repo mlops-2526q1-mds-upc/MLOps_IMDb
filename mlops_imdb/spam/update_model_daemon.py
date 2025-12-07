@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 import time
 
+import requests  # <--- NEW IMPORT
+
 from mlops_imdb.logger import get_logger
 from mlops_imdb.spam.download_production_model import (
     configure_mlflow,
@@ -19,6 +21,11 @@ from mlops_imdb.spam.download_production_model import (
 )
 
 POLL_SECONDS = int(os.getenv("SPAM_MODEL_POLL_SECONDS", "300"))
+# The internal URL. Note the port 9000 (internal only).
+API_RELOAD_URL = os.getenv(
+    "SPAM_API_RELOAD_URL", "http://spam-api:9000/reload"
+)  # the spam-api is the container name in the docker compose
+
 logger = get_logger(__name__)
 
 
@@ -30,6 +37,29 @@ def is_up_to_date(target_dir: Path, latest_run_start_ms: int) -> bool:
     if prev_run_start_ms is None:
         return False
     return latest_run_start_ms <= prev_run_start_ms
+
+
+def notify_api_reload():
+    """
+    Sends a request to the API's internal admin port to reload the model from disk.
+    This ensures the API serves the new files immediately.
+    """
+    try:
+        logger.info("Notifying spam-api to reload model...")
+        # We use a timeout so the updater doesn't hang if the API is frozen
+        response = requests.post(API_RELOAD_URL, timeout=10)
+
+        if response.status_code == 200:
+            logger.info("spam-api reloaded successfully: %s", response.json())
+        else:
+            logger.error(
+                "spam-api failed to reload. Status: %s, Response: %s",
+                response.status_code,
+                response.text,
+            )
+    except requests.exceptions.RequestException as e:
+        # We log a warning but don't crash, so the updater keeps running
+        logger.warning("Could not contact spam-api at %s. Error: %s", API_RELOAD_URL, e)
 
 
 def main():
@@ -70,6 +100,9 @@ def main():
                 shutil.rmtree(target_dir)
             staging_dir.rename(target_dir)
             logger.info("Updated spam_model from run %s", run.info.run_id)
+
+            notify_api_reload()
+
         except Exception as exc:
             logger.exception("[updater] Error: %s", exc)
 
