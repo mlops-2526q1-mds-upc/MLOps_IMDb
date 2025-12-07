@@ -152,17 +152,16 @@ def main():
                     preds_list.append(preds.cpu())
                     labels_list.append(batch_labels.cpu())
 
-
             pred_tensor = torch.cat(preds_list).detach().cpu()
             true_tensor = torch.cat(labels_list).detach().cpu()
-            
+
             try:
                 y_pred = pred_tensor.numpy()
                 y_true = true_tensor.numpy()
             except RuntimeError:
                 y_pred = np.array(pred_tensor.tolist())
                 y_true = np.array(true_tensor.tolist())
-            
+
             y_pred_cls = (y_pred > 0.5).astype(int)
 
             acc = accuracy_score(y_true, y_pred_cls)
