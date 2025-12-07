@@ -125,18 +125,7 @@ Update behavior:
 - The updater polls MLflow every `SPAM_MODEL_POLL_SECONDS` (default 300s). When it sees a newer `spam_eval` run with a production tag/label, it downloads into a staging folder and atomically swaps into `SPAM_MODEL_DIR`.
 - The inference container only loads the model at startup. After the updater pulls a newer model, restart/roll the inference container to pick up the fresh artifacts.
 
-
-```mermaid
-flowchart TD
-    Host["Host machine"] -->|docker run| Inference["spam-api (uvicorn + download_production_model.py)"]
-    Host -->|docker run| Updater["spam-model-updater (update_model_daemon.py)"]
-    Inference --> Volume["Named volume<br>/shared/models"]
-    Updater --> Volume
-    Updater -->|polls tags.stage=spam_eval + production| MLflow["MLflow tracking URI"]
-    Volume --> ModelPath["/shared/models/spam_model_production/spam_model"]
-    ModelPath --> API["FastAPI /predict"]
-    API --> Client["Client requests"]
-```
+<img width="1555" height="850" alt="Captura de pantalla 2025-12-07 152027" src="https://github.com/user-attachments/assets/508c63ec-f984-4882-bb1c-038955dd6682" />
 
 ### Development Commands
 
@@ -208,4 +197,5 @@ make clean
 ```
 
 --------
+
 
