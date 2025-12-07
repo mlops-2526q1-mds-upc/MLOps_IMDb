@@ -7,17 +7,14 @@ stages:
       hash: md5
       md5: 0b6a6e22790570c21fc32211b41578c3
       size: 32540147
-      isexec: true
     - path: data/raw/imdb_train.csv
       hash: md5
       md5: dc4c040dd7f3bfb42a279cb1f73725d5
       size: 33322167
-      isexec: true
     - path: mlops_imdb/data/prepare.py
       hash: md5
       md5: b31960536d19dc776da4838f0d64e392
       size: 4581
-      isexec: true
     params:
       params.yaml:
         data:
@@ -45,126 +42,12 @@ stages:
     outs:
     - path: data/processed/imdb_test_clean.csv
       hash: md5
-      md5: c96b5d7197046d5d1c9b16fb9580c898
-      size: 32005227
-      isexec: true
+      md5: 5d0e8e3b8155ad7156fce9c9a496e544
+      size: 31980226
     - path: data/processed/imdb_train_clean.csv
       hash: md5
-      md5: 1da332c8b46ee244eeaddd255532af0d
-      size: 32776856
-      isexec: true
-  features:
-    cmd: python mlops_imdb/features/build_features.py
-    deps:
-    - path: data/processed/imdb_test_clean.csv
-      hash: md5
-      md5: c96b5d7197046d5d1c9b16fb9580c898
-      size: 32005227
-      isexec: true
-    - path: data/processed/imdb_train_clean.csv
-      hash: md5
-      md5: 1da332c8b46ee244eeaddd255532af0d
-      size: 32776856
-      isexec: true
-    - path: mlops_imdb/features/build_features.py
-      hash: md5
-      md5: 04914a97a59a5bf5496c4fdfde8ff1de
-      size: 3318
-      isexec: true
-    params:
-      params.yaml:
-        features:
-          vectorizer: tfidf
-          tfidf:
-            max_features: 10000
-            ngram_range:
-            - 1
-            - 2
-            min_df: 2
-            max_df: 0.95
-          outputs:
-            train_features: data/processed/imdb_train_features.npz
-            test_features: data/processed/imdb_test_features.npz
-            vectorizer_path: models/tfidf_vectorizer.pkl
-    outs:
-    - path: data/processed/imdb_test_features.npz
-      hash: md5
-      md5: 52abcd227bf646af57f579105fbcec89
-      size: 40230615
-      isexec: true
-    - path: data/processed/imdb_train_features.npz
-      hash: md5
-      md5: 12e54f6cb3997b8831677b067a484289
-      size: 42017550
-      isexec: true
-    - path: models/tfidf_vectorizer.pkl
-      hash: md5
-      md5: 23cb7631e3690c0fe78bf636c418a9d6
-      size: 377517
-      isexec: true
-  train:
-    cmd: python mlops_imdb/modeling/train.py
-    deps:
-    - path: data/processed/imdb_train_features.npz
-      hash: md5
-      md5: 12e54f6cb3997b8831677b067a484289
-      size: 42017550
-      isexec: true
-    - path: mlops_imdb/modeling/train.py
-      hash: md5
-      md5: 134dc60a6cc8d752a378d448ebc793c8
-      size: 3950
-      isexec: true
-    params:
-      params.yaml:
-        train:
-          model_type: logistic_regression
-          logreg:
-            max_iter: 1000
-            random_state: 42
-          outputs:
-            model_path: models/model.pkl
-    outs:
-    - path: models/model.pkl
-      hash: md5
-      md5: d24f5929d26e5a76a24c3acd17199553
-      size: 80891
-      isexec: true
-  eval:
-    cmd: python mlops_imdb/modeling/eval.py
-    deps:
-    - path: data/processed/imdb_test_features.npz
-      hash: md5
-      md5: 52abcd227bf646af57f579105fbcec89
-      size: 40230615
-      isexec: true
-    - path: mlops_imdb/modeling/eval.py
-      hash: md5
-      md5: 2d1392313eab6f8fb1910e2ac51f1bd4
-      size: 5813
-      isexec: true
-    - path: models/model.pkl
-      hash: md5
-      md5: d24f5929d26e5a76a24c3acd17199553
-      size: 80891
-      isexec: true
-    params:
-      params.yaml:
-        eval:
-          metrics:
-          - accuracy
-          - precision
-          - recall
-          - f1
-          outputs:
-            metrics_json: reports/metrics.json
-            confusion_matrix_png: reports/figures/baseline_confusion_matrix.png
-    outs:
-    - path: reports/metrics.json
-      hash: md5
-      md5: 060cf8d356116507c505667ab1a1fa71
-      size: 405
-      isexec: true
+      md5: 569148bf4dbc190c707a8798b0c27b85
+      size: 32751855
   spam_prepare:
     cmd: python mlops_imdb/spam/prepare.py
     deps:
@@ -178,8 +61,8 @@ stages:
       size: 1884251
     - path: mlops_imdb/spam/prepare.py
       hash: md5
-      md5: 093880a6cd13d15cae3896198782adbb
-      size: 3468
+      md5: 7a8e34408fff763b9ffc15598b4f7e38
+      size: 3572
     params:
       params.yaml:
         spam.data:
@@ -225,8 +108,8 @@ stages:
       size: 6133521
     - path: mlops_imdb/spam/features.py
       hash: md5
-      md5: 02133fcb928bc052a1d925bce2b58c24
-      size: 5332
+      md5: 93152f0934c9422c01f9957e3f7dcc03
+      size: 5504
     params:
       params.yaml:
         spam.features:
@@ -261,12 +144,12 @@ stages:
       size: 3304224
     - path: mlops_imdb/spam/model.py
       hash: md5
-      md5: de6fe3f22fe01a79c44b385d7381dc7a
-      size: 1215
+      md5: 8b7e60fb4d0b7969a19745c878192e3f
+      size: 1254
     - path: mlops_imdb/spam/train.py
       hash: md5
-      md5: 96ecbe2bd75f374e323c8513a8dbea5b
-      size: 9301
+      md5: acd7cf0e8f2d1ceba070f32f1aa8373c
+      size: 9555
     - path: models/spam_vocab.json
       hash: md5
       md5: fb4dc202b013b4b11ea36ad8292323dc
@@ -291,7 +174,7 @@ stages:
       size: 10714085
     - path: reports/figures/spam_training_loss.png
       hash: md5
-      md5: 6c5cf4b6c5a97dc7f265b03d2e209159
+      md5: 50161318466e70ab9734c7e5563fe75b
       size: 50055
   spam_eval:
     cmd: python mlops_imdb/spam/eval.py
@@ -302,12 +185,12 @@ stages:
       size: 1102426
     - path: mlops_imdb/spam/eval.py
       hash: md5
-      md5: b727a06fdf8391d8c7ea18795f016ca2
-      size: 9355
+      md5: 901d142f73ae7fca3e9c2a710d179be6
+      size: 9610
     - path: mlops_imdb/spam/model.py
       hash: md5
-      md5: de6fe3f22fe01a79c44b385d7381dc7a
-      size: 1215
+      md5: 8b7e60fb4d0b7969a19745c878192e3f
+      size: 1254
     - path: models/spam_model.pt
       hash: md5
       md5: c30ef3fe59c07edc143b7c4bb7f3a139
@@ -336,7 +219,7 @@ stages:
     outs:
     - path: reports/figures/spam_confusion_matrix.png
       hash: md5
-      md5: 1638ace5c4cc19ef720e6de9fb405657
+      md5: 6629592e4317233f3e8d4ae374907db6
       size: 16925
     - path: reports/spam_metrics.json
       hash: md5

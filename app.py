@@ -1,8 +1,9 @@
-import streamlit as st
-import requests
 from typing import Any, Dict, Optional, Tuple
 
-SPAM_ENDPOINT = "http://localhost:8000/predict"
+import requests
+import streamlit as st
+
+SPAM_ENDPOINT = "https://mlops-imdb-spam-991751526244.europe-west1.run.app/predict"
 SENTIMENT_ENDPOINT = None  # Not implemented yet
 
 
@@ -76,7 +77,11 @@ def display_spam_result(result: Dict[str, Any]) -> None:
 
     # Normalize label
     norm_label = label.lower() if isinstance(label, str) else None
-    is_spam = norm_label == "spam"
+    # Prioritize probability: > 0.5 => spam, otherwise fall back to label
+    if proba is not None:
+        is_spam = proba >= 0.5
+    else:
+        is_spam = norm_label in {"spam", "1", "true"}
 
     # Build a nice message
     if proba is not None:
@@ -99,7 +104,7 @@ def display_spam_result(result: Dict[str, Any]) -> None:
 
 
 def main():
-    st.set_page_config(page_title="Model UI – Spam & Sentiment", page_icon="🤖")
+    st.set_page_config(page_title="Model UI - Spam & Sentiment", page_icon="🤖")
     st.title("🤖 Unified Model UI")
     st.write(
         "This interface lets you test two models:\n"
