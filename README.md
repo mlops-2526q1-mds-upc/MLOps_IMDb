@@ -127,6 +127,8 @@ Update behavior:
 
 <img width="1555" height="850" alt="Captura de pantalla 2025-12-07 152027" src="https://github.com/user-attachments/assets/508c63ec-f984-4882-bb1c-038955dd6682" />
 
+To make the Docker Compose more efficient, we've created only one Docker image for all three services and set the environment variables and commands from the docker-compose.yml file.
+
 ### Development Commands
 
 ```bash
@@ -197,5 +199,6 @@ make clean
 ```
 
 --------
+
 
 
