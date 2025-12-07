@@ -16,34 +16,44 @@ classifiers = [
     "License :: OSI Approved :: MIT License"
 ]
 dependencies = [
+    "fastapi>=0.115.6",
+    "loguru",
+    "mlflow-skinny>=3.4.0",
+    "numpy",
+    "pandas",
+    "protobuf<5",
+    "pydantic>=2.12.0",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "scikit-learn",
+    "streamlit>=1.52.1",
+    "torch==2.3.1",
+    "uvicorn>=0.32.1",
+]
+requires-python = "~=3.12.0"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pre-commit>=4.3.0",
+    "ruff>=0.7.0",
+]
+
+train = [
     "codecarbon>=3.0.5",
     "datasets",
     "dvc",
     "dvc-s3>=3.2.2",
-    "fastapi>=0.115.6",
     "ipython",
     "jupyterlab",
-    "loguru",
     "matplotlib",
-    "mlflow>=3.4.0",
     "nltk>=3.9.2",
     "notebook",
-    "numpy",
-    "pandas",
-    "pip",
-    "protobuf<5",
-    "pytest",
-    "python-dotenv",
-    "ruff",
-    "scikit-learn",
     "seaborn",
-    "streamlit>=1.52.1",
-    "torch==2.3.1",
     "tqdm",
     "typer",
-    "uvicorn>=0.32.1",
 ]
-requires-python = "~=3.12.0"
 
 
 [tool.ruff]
@@ -61,6 +71,7 @@ force-sort-within-sections = true
 [dependency-groups]
 dev = [
     "pre-commit>=4.3.0",
+    "pytest",
     "ruff>=0.7.0",  # or latest stable
 ]
 
