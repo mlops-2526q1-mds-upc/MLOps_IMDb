@@ -210,7 +210,6 @@ reports/codecarbon_emissions.csv
 *.pt
 
 statement/
-reports/
 
 .vscode/
 
