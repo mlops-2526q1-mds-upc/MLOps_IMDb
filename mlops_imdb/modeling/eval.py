@@ -4,13 +4,10 @@
 from contextlib import nullcontext
 import json
 import os
+from pathlib import Path
 import shutil
 import sys
-from pathlib import Path
 from tempfile import TemporaryDirectory
-
-if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from codecarbon import EmissionsTracker
 import joblib
@@ -29,6 +26,9 @@ import yaml
 
 from mlops_imdb.config import configure_mlflow
 from mlops_imdb.modeling.mlflow_model import SentimentPyfuncModel
+
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 def load_params(path: str = "params.yaml") -> dict:
