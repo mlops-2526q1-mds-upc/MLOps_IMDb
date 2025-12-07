@@ -1,4 +1,3 @@
-
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 ENV PYTHONUNBUFFERED=1 \
@@ -13,12 +12,12 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # Explicitly copy the README and LICENSE required by pyproject.toml
-COPY README.md LICENSE /app/
+COPY README.md LICENSE params.yaml /app/
 # Copy project into the build context
 COPY /mlops_imdb /app/mlops_imdb
 RUN uv sync --frozen --no-dev
 
-FROM python:3.12-slim AS runtime-base
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -30,17 +29,7 @@ WORKDIR /app
 # Reuse the prebuilt virtualenv and source tree from the builder
 COPY --from=builder /app /app
 
-FROM runtime-base AS sentiment-api
+EXPOSE 8000 8501
 
-ENV SENTIMENT_MODEL_URI="models/sentiment_model_production/sentiment_model"
-
-EXPOSE 8000
-
-CMD ["python", "mlops_imdb/modeling/api.py"]
-
-FROM runtime-base AS sentiment-model-updater
-
-ENV SENTIMENT_MODEL_DIR="/shared/models/sentiment_model_production" \
-    SENTIMENT_MODEL_POLL_SECONDS="300"
-
-CMD ["python3", "mlops_imdb/modeling/update_model_daemon.py"]
+# Commands are supplied per-service from docker-compose
+CMD ["bash"]

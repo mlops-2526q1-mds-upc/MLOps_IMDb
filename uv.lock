@@ -1823,6 +1823,7 @@ name = "mlops-imdb"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "codecarbon" },
     { name = "fastapi" },
     { name = "loguru" },
     { name = "mlflow-skinny" },
@@ -1847,7 +1848,6 @@ dev = [
     { name = "ruff" },
 ]
 train = [
-    { name = "codecarbon" },
     { name = "datasets" },
     { name = "dvc" },
     { name = "dvc-s3" },
@@ -1870,7 +1870,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "codecarbon", marker = "extra == 'train'", specifier = ">=3.0.5" },
+    { name = "codecarbon", specifier = ">=3.0.5" },
     { name = "datasets", marker = "extra == 'train'" },
     { name = "dvc", marker = "extra == 'train'" },
     { name = "dvc-s3", marker = "extra == 'train'", specifier = ">=3.2.2" },

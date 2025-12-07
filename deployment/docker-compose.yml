@@ -1,10 +1,10 @@
 
+x-app-image: &app-image
+  image: mlops-imdb:latest
+
 services:
   spam-model-updater:
-    build:
-      context: ..
-      dockerfile: deployment/spam/Dockerfile
-      target: spam-model-updater
+    <<: *app-image
     env_file:
       - ../.env
     environment:
@@ -15,12 +15,13 @@ services:
     networks:
       - spam-net
     restart: unless-stopped
+    command: ["python3", "mlops_imdb/spam/update_model_daemon.py"]
 
   spam-api:
+    <<: *app-image
     build:
       context: ..
-      dockerfile: deployment/spam/Dockerfile
-      target: spam-api
+      dockerfile: deployment/Dockerfile
     env_file:
       - ../.env
     environment:
@@ -34,12 +35,10 @@ services:
     networks:
       - spam-net
     restart: unless-stopped
+    command: ["python", "mlops_imdb/spam/api.py"]
 
   sentiment-model-updater:
-    build:
-      context: ..
-      dockerfile: deployment/sentiment/Dockerfile
-      target: sentiment-model-updater
+    <<: *app-image
     env_file:
       - ../.env
     environment:
@@ -50,12 +49,10 @@ services:
     networks:
       - sentiment-net
     restart: unless-stopped
+    command: ["python3", "mlops_imdb/modeling/update_model_daemon.py"]
 
   sentiment-api:
-    build:
-      context: ..
-      dockerfile: deployment/sentiment/Dockerfile
-      target: sentiment-api
+    <<: *app-image
     env_file:
       - ../.env
     environment:
@@ -69,12 +66,10 @@ services:
     networks:
       - sentiment-net
     restart: unless-stopped
+    command: ["python", "mlops_imdb/modeling/api.py"]
 
   ui:
-    build:
-      context: ..
-      dockerfile: deployment/sentiment/Dockerfile
-      target: runtime-base
+    <<: *app-image
     env_file:
       - ../.env
     environment:
@@ -88,7 +83,7 @@ services:
     networks:
       - spam-net
       - sentiment-net
-    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
+    command: streamlit run mlops_imdb/app.py --server.port=8501 --server.address=0.0.0.0
     restart: unless-stopped
 
 volumes:
