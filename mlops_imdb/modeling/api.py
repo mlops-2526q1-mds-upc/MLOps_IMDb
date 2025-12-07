@@ -10,9 +10,12 @@ import mlflow
 import pandas as pd
 from pydantic import BaseModel, Field
 
+from mlops_imdb.logger import get_logger
+
 DEFAULT_MODEL_URI = os.getenv(
     "SENTIMENT_MODEL_URI", "models/sentiment_model_production/sentiment_model"
 )
+logger = get_logger(__name__)
 
 
 class PredictRequest(BaseModel):
@@ -37,30 +40,60 @@ def load_model(uri: str):
     """Load the MLflow pyfunc model from the given URI."""
     resolved = _resolve_model_uri(uri)
     try:
-        return mlflow.pyfunc.load_model(resolved)
+        model = mlflow.pyfunc.load_model(resolved)
+        logger.info("Loaded sentiment model from %s", resolved)
+        return model
     except Exception as exc:
+        logger.exception("Failed to load sentiment model from %s", resolved)
         raise RuntimeError(f"Failed to load model from {resolved}") from exc
 
 
 app = FastAPI(title="IMDb Sentiment Analyzer", version="1.0.0")
-model = load_model(DEFAULT_MODEL_URI)
+model = None
+
+
+def get_model(raise_if_unavailable: bool = True):
+    """Return a cached model instance, loading it if needed."""
+    global model
+    if model is not None:
+        return model
+    try:
+        model = load_model(DEFAULT_MODEL_URI)
+        return model
+    except Exception as exc:
+        if raise_if_unavailable:
+            raise HTTPException(status_code=503, detail="Model not available") from exc
+        logger.warning(
+            "Sentiment model could not be loaded from %s; API will return 503 until available",
+            _resolve_model_uri(DEFAULT_MODEL_URI),
+        )
+        return None
 
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(payload: PredictRequest):
     """Return sentiment probability and label for the provided text."""
     try:
+        model_instance = model or get_model()
         df = pd.DataFrame({"text": [payload.text]})
-        proba = model.predict(df)
+        proba = model_instance.predict(df)
         proba_val = float(proba[0]) if hasattr(proba, "__len__") else float(proba)
         label = int(proba_val >= 0.5)
         sentiment = "positive" if label == 1 else "negative"
+        logger.info(
+            "Predicted sentiment for input text: %s has sentiment: %s with probability: %f",
+            payload.text,
+            sentiment,
+            proba_val,
+        )
         return PredictResponse(probability=proba_val, label=label, sentiment=sentiment)
     except Exception as exc:
+        logger.exception("Prediction failed for payload")
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.get("/health")
 def health():
     """Health check endpoint."""
-    return {"status": "ok", "model_uri": DEFAULT_MODEL_URI}
+    logger.info("Health check requested")
+    return {"status": "ok", "model_uri": DEFAULT_MODEL_URI, "model_loaded": model is not None}

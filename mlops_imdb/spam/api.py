@@ -10,7 +10,10 @@ import mlflow
 import pandas as pd
 from pydantic import BaseModel, Field
 
+from mlops_imdb.logger import get_logger
+
 DEFAULT_MODEL_URI = os.getenv("SPAM_MODEL_URI", "models/spam_model_production/spam_model")
+logger = get_logger(__name__)
 
 
 class PredictRequest(BaseModel):
@@ -31,8 +34,11 @@ def _resolve_model_uri(uri: str) -> str:
 def load_model(uri: str):
     resolved = _resolve_model_uri(uri)
     try:
-        return mlflow.pyfunc.load_model(resolved)
+        model = mlflow.pyfunc.load_model(resolved)
+        logger.info("Loaded spam model from %s", resolved)
+        return model
     except Exception as exc:
+        logger.exception("Failed to load model from %s", resolved)
         raise RuntimeError(f"Failed to load model from {resolved}") from exc
 
 
@@ -48,11 +54,19 @@ def predict(payload: PredictRequest):
         proba = model.predict(df)
         proba_val = float(proba[0]) if hasattr(proba, "__len__") else float(proba)
         label = int(proba_val >= 0.5)
+        logger.info(
+            "Predicted spam for input text: %s was classified as %d with probability: %f",
+            payload.text,
+            label,
+            proba_val,
+        )
         return PredictResponse(probability=proba_val, label=label)
     except Exception as exc:
+        logger.exception("Prediction failed for payload")
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.get("/health")
 def health():
+    logger.info("Health check requested")
     return {"status": "ok", "model_uri": DEFAULT_MODEL_URI}
