@@ -42,12 +42,12 @@ stages:
     outs:
     - path: data/processed/imdb_test_clean.csv
       hash: md5
-      md5: 5d0e8e3b8155ad7156fce9c9a496e544
-      size: 31980226
+      md5: c96b5d7197046d5d1c9b16fb9580c898
+      size: 32005227
     - path: data/processed/imdb_train_clean.csv
       hash: md5
-      md5: 569148bf4dbc190c707a8798b0c27b85
-      size: 32751855
+      md5: 1da332c8b46ee244eeaddd255532af0d
+      size: 32776856
   spam_prepare:
     cmd: python mlops_imdb/spam/prepare.py
     deps:
