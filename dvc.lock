@@ -148,8 +148,8 @@ stages:
       size: 1254
     - path: mlops_imdb/spam/train.py
       hash: md5
-      md5: ccacb45d854069cfa7a091e9d8db8d66
-      size: 10457
+      md5: 81d8eb0b8bffb0f1461b34bdc2919246
+      size: 10545
     - path: models/spam_vocab.json
       hash: md5
       md5: 83acffed9a5e21042cc744ae3784eaad
@@ -266,7 +266,7 @@ stages:
       size: 42017550
     - path: models/tfidf_vectorizer.pkl
       hash: md5
-      md5: acbe2baddee57b6e1b7d01609eb8a78f
+      md5: 624e0d69e00a90edf4aac4d3cf73023c
       size: 377520
   train:
     cmd: python mlops_imdb/modeling/train.py
