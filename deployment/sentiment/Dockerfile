@@ -34,7 +34,7 @@ ENV SENTIMENT_MODEL_URI="models/sentiment_model_production/sentiment_model"
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python3 mlops_imdb/modeling/download_production_model.py --output-dir /shared/models/sentiment_model_production && uvicorn mlops_imdb.modeling.api:app --host 0.0.0.0 --port 8000"]
+CMD ["python", "mlops_imdb/modeling/api.py"]
 
 FROM runtime-base AS sentiment-model-updater
 

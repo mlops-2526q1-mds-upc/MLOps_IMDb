@@ -38,6 +38,6 @@ CMD ["python", "mlops_imdb/spam/api.py"]
 FROM runtime-base AS spam-model-updater
 
 ENV SPAM_MODEL_DIR="/shared/models/spam_model_production" \
-    SPAM_MODEL_POLL_SECONDS="300"
+    SPAM_MODEL_POLL_SECONDS="30"
 
 CMD ["python3", "mlops_imdb/spam/update_model_daemon.py"]

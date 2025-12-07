@@ -3,13 +3,13 @@ flavors:
     artifacts:
       config:
         path: artifacts/config.json
-        uri: /tmp/tmplqhsv66y/config.json
+        uri: /tmp/tmplbf67_ss/config.json
       state_dict:
         path: artifacts/state_dict.pt
-        uri: /tmp/tmplqhsv66y/state_dict.pt
+        uri: /tmp/tmplbf67_ss/state_dict.pt
       vocab:
         path: artifacts/vocab.json
-        uri: /tmp/tmplqhsv66y/vocab.json
+        uri: /tmp/tmplbf67_ss/vocab.json
     cloudpickle_version: 3.1.1
     code: null
     env:
@@ -22,12 +22,12 @@ flavors:
 is_signature_from_type_hint: false
 mlflow_version: 3.4.0
 model_id: null
-model_size_bytes: 11756939
-model_uuid: 7f75131b1087461db1f9d9954d02531a
+model_size_bytes: 11757342
+model_uuid: 471819238b9f49d48c3011df9610af6d
 prompts: null
 signature:
   inputs: '[{"type": "string", "name": "text", "required": true}]'
   outputs: '[{"type": "double", "name": "prediction", "required": true}]'
   params: null
 type_hint_from_example: false
-utc_time_created: '2025-11-30 17:54:34.494974'
+utc_time_created: '2025-11-30 10:15:42.946527'

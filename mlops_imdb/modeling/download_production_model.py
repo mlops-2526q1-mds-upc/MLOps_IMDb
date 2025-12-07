@@ -145,7 +145,10 @@ def main():
         except Exception:
             prev_run_start_dt = None
 
-        if prev_run_start_dt and latest_start <= prev_run_start_dt:
+        # Only skip download when the upstream run start time matches the stored one.
+        # If the upstream start time changes (newer or older), we fetch again because the
+        # production tag may have moved.
+        if prev_run_start_dt and latest_start == prev_run_start_dt:
             local_ts = (
                 prev_download_dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
                 if prev_download_dt
@@ -155,7 +158,7 @@ def main():
                 "%Y-%m-%d %H:%M:%S UTC"
             )
             print(
-                f"Local sentiment_model is up to date. "
+                f"Local sentiment_model start time matches upstream. "
                 f"(local run {prev_run_id}, downloaded at {local_ts}; "
                 f"upstream run started {upstream_ts})"
             )

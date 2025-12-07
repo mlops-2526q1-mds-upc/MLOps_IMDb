@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 import time
 
+import requests
+
 from mlops_imdb.logger import get_logger
 from mlops_imdb.modeling.download_production_model import (
     configure_mlflow,
@@ -19,6 +21,9 @@ from mlops_imdb.modeling.download_production_model import (
 )
 
 POLL_SECONDS = int(os.getenv("SENTIMENT_MODEL_POLL_SECONDS", "300"))
+API_RELOAD_URL = os.getenv(
+    "SENTIMENT_API_RELOAD_URL", "http://sentiment-api:9000/reload"
+)  # sentiment-api is the container name in docker compose
 logger = get_logger(__name__)
 
 
@@ -29,7 +34,30 @@ def is_up_to_date(target_dir: Path, latest_run_start_ms: int) -> bool:
     prev_run_start_ms = meta.get("run_start_time_ms")
     if prev_run_start_ms is None:
         return False
-    return latest_run_start_ms <= prev_run_start_ms
+    # Only consider up-to-date when the stored run has the same start timestamp.
+    # If the production tag moves (newer or older), we need to refresh.
+    return latest_run_start_ms == prev_run_start_ms
+
+
+def notify_api_reload():
+    """
+    Sends a request to the API's internal admin port to reload the model from disk.
+    This ensures the API serves the new files immediately.
+    """
+    try:
+        logger.info("Notifying sentiment-api to reload model...")
+        response = requests.post(API_RELOAD_URL, timeout=10)
+
+        if response.status_code == 200:
+            logger.info("sentiment-api reloaded successfully: %s", response.json())
+        else:
+            logger.error(
+                "sentiment-api failed to reload. Status: %s, Response: %s",
+                response.status_code,
+                response.text,
+            )
+    except requests.exceptions.RequestException as exc:
+        logger.warning("Could not contact sentiment-api at %s. Error: %s", API_RELOAD_URL, exc)
 
 
 def main():
@@ -70,6 +98,7 @@ def main():
                 shutil.rmtree(target_dir)
             staging_dir.rename(target_dir)
             logger.info("Updated sentiment_model from run %s", run.info.run_id)
+            notify_api_reload()
         except Exception as exc:
             logger.exception("[sentiment_updater] Error: %s", exc)
 

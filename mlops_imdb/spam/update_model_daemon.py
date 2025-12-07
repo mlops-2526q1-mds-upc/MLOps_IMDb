@@ -36,7 +36,9 @@ def is_up_to_date(target_dir: Path, latest_run_start_ms: int) -> bool:
     prev_run_start_ms = meta.get("run_start_time_ms")
     if prev_run_start_ms is None:
         return False
-    return latest_run_start_ms <= prev_run_start_ms
+    # Only consider up-to-date when the stored run has the same start timestamp.
+    # If the production tag moves (newer or older), we need to refresh.
+    return latest_run_start_ms == prev_run_start_ms
 
 
 def notify_api_reload():
