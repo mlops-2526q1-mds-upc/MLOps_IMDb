@@ -37,6 +37,7 @@ dependencies = [
     "ruff",
     "scikit-learn",
     "seaborn",
+    "streamlit>=1.52.1",
     "torch==2.3.1",
     "tqdm",
     "typer",
