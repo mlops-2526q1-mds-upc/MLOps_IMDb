@@ -21,11 +21,15 @@ class SentimentPyfuncModel(mlflow.pyfunc.PythonModel):
 
     def load_context(self, context):
         """Load model artifacts: config, vectorizer, and classifier."""
-        with open(context.artifacts["config"], "r", encoding="utf-8") as f:
+        config_path = Path(context.artifacts["config"].replace("\\", "/"))
+        vectorizer_path = Path(context.artifacts["vectorizer"].replace("\\", "/"))
+        model_path = Path(context.artifacts["model"].replace("\\", "/"))
+
+        with open(config_path, "r", encoding="utf-8") as f:
             self.config = json.load(f)
 
-        self.vectorizer = joblib.load(context.artifacts["vectorizer"])
-        self.model = joblib.load(context.artifacts["model"])
+        self.vectorizer = joblib.load(vectorizer_path)
+        self.model = joblib.load(model_path)
 
         self.preprocess_cfg = self.config.get(
             "preprocess_cfg",
