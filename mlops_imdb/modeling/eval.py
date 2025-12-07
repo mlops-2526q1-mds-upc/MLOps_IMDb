@@ -158,6 +158,11 @@ def main():
                 mlflow.log_artifact(cm_png, artifact_path="eval")
             except Exception:
                 pass
+            try:
+                mlflow.log_artifact(model_path, artifact_path="model")
+                print(f"[eval] Logged model artifact -> {model_path}")
+            except Exception:
+                pass
 
         emissions = getattr(tracker, "final_emissions", None)
         if emissions is not None:
