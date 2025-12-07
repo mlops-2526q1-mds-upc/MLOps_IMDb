@@ -17,7 +17,7 @@ jobs:
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.V_USER != '' && secrets.V_USER || secrets.VM_USER }}
-          key: ${{ secrets.VM_DEPLOY_KEY }}
+          key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd ~/MLOps_IMDb
             git pull origin main
