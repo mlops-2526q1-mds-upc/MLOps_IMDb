@@ -11,8 +11,10 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-# Install project into the already-warmed venv
-COPY . /app
+# Explicitly copy the README and LICENSE required by pyproject.toml
+COPY README.md LICENSE /app/
+# Copy project into the build context
+COPY /mlops_imdb /app/mlops_imdb
 RUN uv sync --frozen --no-dev
 
 FROM python:3.12-slim AS runtime-base
