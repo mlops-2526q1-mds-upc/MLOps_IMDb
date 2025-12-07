@@ -33,7 +33,7 @@ ENV SPAM_MODEL_URI="models/spam_model_production/spam_model"
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python3 mlops_imdb/spam/download_production_model.py --output-dir /shared/models/spam_model_production && uvicorn mlops_imdb.spam.api:app --host 127.0.0.1 --port 8000"]
+CMD ["sh", "-c", "python3 mlops_imdb/spam/download_production_model.py --output-dir /shared/models/spam_model_production && uvicorn mlops_imdb.spam.api:app --host 0.0.0.0 --port 8000"]
 
 FROM runtime-base AS spam-model-updater
 
