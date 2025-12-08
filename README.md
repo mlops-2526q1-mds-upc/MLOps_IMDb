@@ -125,6 +125,35 @@ Update behavior:
 - The updater polls MLflow every `SPAM_MODEL_POLL_SECONDS` (default 300s). When it sees a newer `spam_eval` run with a production tag/label, it downloads into a staging folder and atomically swaps into `SPAM_MODEL_DIR`.
 - The inference container only loads the model at startup. After the updater pulls a newer model, restart/roll the inference container to pick up the fresh artifacts.
 
+
+```mermaid
+flowchart TD
+    Host["Host machine"] -->|docker run| Inference["spam-api (uvicorn + download_production_model.py)"]
+    Host -->|docker run| Updater["spam-model-updater (update_model_daemon.py)"]
+    Inference --> Volume["Named volume<br>/shared/models"]
+    Updater --> Volume
+    Updater -->|polls tags.stage=spam_eval + production| MLflow["MLflow tracking URI"]
+    Volume --> ModelPath["/shared/models/spam_model_production/spam_model"]
+    ModelPath --> API["FastAPI /predict"]
+    API --> Client["Client requests"]
+```
+
+### Docker Compose (spam + sentiment)
+
+Bring up both APIs plus their updater daemons with a single command:
+
+```bash
+cp example.env .env  # fill in MLflow credentials
+docker compose -f deployment/docker-compose.yml up --build -d
+```
+
+- Spam API -> `http://localhost:8000` using volume `spam-models`
+- Sentiment API -> `http://localhost:8001` using volume `sentiment-models`
+- UI (Streamlit) -> `http://localhost:8501` (talks to both APIs via service names)
+- Override poll cadence via `SPAM_MODEL_POLL_SECONDS` or `SENTIMENT_MODEL_POLL_SECONDS`
+- Each pair shares a private network (`spam-net`, `sentiment-net`) so updater and API can talk directly if needed
+- Stop everything with `docker compose -f deployment/docker-compose.yml down`
+
 <img width="1555" height="850" alt="Captura de pantalla 2025-12-07 152027" src="https://github.com/user-attachments/assets/508c63ec-f984-4882-bb1c-038955dd6682" />
 
 To make the Docker Compose more efficient, we've created only one Docker image for all three services and set the environment variables and commands from the docker-compose.yml file.

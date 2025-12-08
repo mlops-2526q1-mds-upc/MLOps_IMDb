@@ -1,8 +1,8 @@
 """Tests for the sentiment prediction API endpoints."""
 
+from fastapi.testclient import TestClient
 import pandas as pd
 import pytest
-from fastapi.testclient import TestClient
 
 from mlops_imdb.modeling import api as sentiment_api
 
@@ -25,7 +25,8 @@ class MockModel:
 def client(monkeypatch):
     """Create a test client with a mocked model."""
     monkeypatch.setattr(sentiment_api, "model", MockModel())
-    return TestClient(sentiment_api.app)
+    with TestClient(sentiment_api.public_app) as test_client:
+        yield test_client
 
 
 class TestHealthEndpoint:
@@ -147,4 +148,3 @@ class TestPredictEndpoint:
         assert response.status_code == 200
         data = response.json()
         assert "probability" in data
-

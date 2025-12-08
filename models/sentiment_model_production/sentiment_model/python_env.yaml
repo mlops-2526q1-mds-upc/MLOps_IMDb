@@ -1,4 +1,4 @@
-python: 3.12.3
+python: 3.12.2
 build_dependencies:
 - pip==25.2
 - setuptools==70.2.0
