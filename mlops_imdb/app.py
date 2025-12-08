@@ -4,8 +4,11 @@ from typing import Any, Dict, Optional, Tuple
 import requests
 import streamlit as st
 
+from mlops_imdb.logger import get_logger
+
 SPAM_ENDPOINT = os.getenv("SPAM_ENDPOINT")
 SENTIMENT_ENDPOINT = os.getenv("SENTIMENT_ENDPOINT") or None  # Not implemented yet
+logger = get_logger(__name__)
 
 
 def call_model(endpoint: str, text: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
@@ -172,6 +175,10 @@ def display_sentiment_result(result: Dict[str, Any]) -> None:
 
 def main():
     st.set_page_config(page_title="Model UI - Spam & Sentiment", page_icon="🤖")
+    if not st.session_state.get("entry_logged"):
+        logger.info("New user session started on the Streamlit UI")
+        st.session_state["entry_logged"] = True
+
     st.title("🤖 Unified Model UI")
     st.write(
         "This interface lets you test two models:\n"
