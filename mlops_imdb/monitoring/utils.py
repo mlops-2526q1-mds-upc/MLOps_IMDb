@@ -54,16 +54,22 @@ def initialize_sentiment_monitoring(
 
     # Resolve paths from params if not provided
     if vectorizer_path is None:
-        vectorizer_path = params.get("features", {}).get("outputs", {}).get(
-            "vectorizer_path", str(MODELS_DIR / "tfidf_vectorizer.pkl")
+        vectorizer_path = (
+            params.get("features", {})
+            .get("outputs", {})
+            .get("vectorizer_path", str(MODELS_DIR / "tfidf_vectorizer.pkl"))
         )
     if train_data_path is None:
-        train_data_path = params.get("data", {}).get("processed", {}).get(
-            "train", str(DATA_DIR / "processed" / "imdb_train_clean.csv")
+        train_data_path = (
+            params.get("data", {})
+            .get("processed", {})
+            .get("train", str(DATA_DIR / "processed" / "imdb_train_clean.csv"))
         )
     if model_path is None:
-        model_path = params.get("train", {}).get("outputs", {}).get(
-            "model_path", str(MODELS_DIR / "model.pkl")
+        model_path = (
+            params.get("train", {})
+            .get("outputs", {})
+            .get("model_path", str(MODELS_DIR / "model.pkl"))
         )
 
     drift_detector = None
@@ -100,9 +106,7 @@ def initialize_sentiment_monitoring(
                         p_threshold=p_threshold,
                         detector_type="ks",
                     )
-                    logger.info(
-                        "Created drift detector with %d reference samples", len(texts)
-                    )
+                    logger.info("Created drift detector with %d reference samples", len(texts))
         else:
             logger.warning("Vectorizer not found at %s", vectorizer_path)
 
@@ -111,8 +115,10 @@ def initialize_sentiment_monitoring(
             model = joblib.load(model_path)
 
             # Load test data for reference predictions
-            test_data_path = params.get("data", {}).get("processed", {}).get(
-                "test", str(DATA_DIR / "processed" / "imdb_test_clean.csv")
+            test_data_path = (
+                params.get("data", {})
+                .get("processed", {})
+                .get("test", str(DATA_DIR / "processed" / "imdb_test_clean.csv"))
             )
 
             if os.path.exists(test_data_path):
@@ -164,8 +170,6 @@ def initialize_spam_monitoring(
     Returns:
         Tuple of (DriftDetector, PredictionMonitor) or (None, None) on failure.
     """
-    params = load_params()
-    spam_cfg = params.get("spam", {})
 
     # For spam, we'll use a simpler approach - just prediction monitoring
     # since the model uses embeddings rather than TF-IDF
@@ -279,4 +283,3 @@ def get_monitoring_config() -> dict:
         return result
 
     return deep_merge(defaults, monitoring_cfg)
-

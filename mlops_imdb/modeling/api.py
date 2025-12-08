@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import asyncio
-import os
 import json
 import logging
+import os
 from pathlib import Path
-import json
 from threading import Lock
 from typing import Optional
 
@@ -18,7 +17,7 @@ from pydantic import BaseModel, Field
 import uvicorn
 
 from mlops_imdb.logger import get_logger
-from mlops_imdb.monitoring import DriftDetector, DriftReport, PredictionMonitor
+from mlops_imdb.monitoring import DriftDetector, PredictionMonitor
 from mlops_imdb.monitoring.utils import (
     get_monitoring_config,
     initialize_sentiment_monitoring,
@@ -66,7 +65,6 @@ def load_model(uri: str):
     except Exception as exc:
         logger.exception("Failed to load sentiment model from %s", resolved)
         raise RuntimeError(f"Failed to load model from {resolved}") from exc
-
 
 
 public_app = FastAPI(title="IMDb Sentiment Analyzer", version="1.0.0")
@@ -138,6 +136,7 @@ def _log_monitoring_event(event: str, payload: dict, level: str = "info") -> Non
             mon_logger.info(message)
     except Exception as exc:
         logger.debug("Failed to emit monitoring log: %s", exc)
+
 
 try:
     initialize_monitoring()

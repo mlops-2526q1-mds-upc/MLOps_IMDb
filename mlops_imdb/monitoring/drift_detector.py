@@ -7,12 +7,12 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from threading import Lock
-from typing import Any, List, Optional
+from typing import List, Optional
 
-import joblib
-import numpy as np
 from alibi_detect.cd import ChiSquareDrift, KSDrift, TabularDrift
 from alibi_detect.saving import load_detector, save_detector
+import joblib
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from mlops_imdb.logger import get_logger
@@ -480,4 +480,3 @@ def create_detector_from_training_data(
         len(train_texts),
     )
     return detector
-

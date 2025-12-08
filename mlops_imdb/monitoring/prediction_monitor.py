@@ -9,8 +9,8 @@ from enum import Enum
 from threading import Lock
 from typing import Deque, Dict, List, Optional, Tuple
 
-import numpy as np
 from alibi_detect.cd import KSDrift
+import numpy as np
 
 from mlops_imdb.logger import get_logger
 
@@ -383,4 +383,3 @@ def create_monitor_from_test_predictions(
         len(test_predictions),
     )
     return monitor
-

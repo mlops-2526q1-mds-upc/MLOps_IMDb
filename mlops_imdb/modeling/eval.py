@@ -4,9 +4,9 @@
 from contextlib import nullcontext
 import json
 import os
+from pathlib import Path
 import shutil
 import sys
-from pathlib import Path
 from tempfile import TemporaryDirectory
 
 if sys.platform == "win32":
@@ -158,11 +158,14 @@ def main():
                 pass
 
             vectorizer_path = features_out["vectorizer_path"]
-            preprocess_cfg = params.get("preprocessing", {
-                "lowercase": True,
-                "remove_html_tags": True,
-                "normalize_whitespace": True,
-            })
+            preprocess_cfg = params.get(
+                "preprocessing",
+                {
+                    "lowercase": True,
+                    "remove_html_tags": True,
+                    "normalize_whitespace": True,
+                },
+            )
 
             infer_config = {
                 "threshold": 0.5,
