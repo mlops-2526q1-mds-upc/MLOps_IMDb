@@ -25,4 +25,25 @@ scrape_configs:
 
     # 3. Process the log lines
     pipeline_stages:
-      - docker: {} # Helper to parse standard Docker JSON logs
+      - docker: {} # Extracts 'log' field from Docker JSON wrapper
+      # Only parse lines that look like our JSON monitoring events
+      - regex:
+          expression: '^(?P<json_content>\{.*"event".*\})$'
+      - json:
+          source: json_content
+          expressions:
+            service: service
+            event: event
+            status: status
+            level: level
+            metric: metric
+            detector: detector
+            sample_size: sample_size
+            p_value: p_value
+            threshold: threshold
+      - labels:
+          service:
+          event:
+          status:
+          metric:
+          detector:
