@@ -34,7 +34,7 @@ steps:
       - compute
       - ssh
       - vasco@models-server          # <-- your VM user@instance-name
-      - --zone=europe-west1-b    # <-- replace with your VM's zone
+      - --zone=us-central1-a    # <-- replace with your VM's zone
       - --project=galvanized-yeti-479117-r1
       - --command=cd ~/MLOps_IMDb/deployment && git pull origin main && docker compose pull && docker compose up -d
       - --quiet
