@@ -17,12 +17,16 @@ class SpamPyfuncModel(mlflow.pyfunc.PythonModel):
     """Pyfunc model that accepts raw text and returns spam probabilities."""
 
     def load_context(self, context):
-        with open(context.artifacts["config"], "r", encoding="utf-8") as f:
+        config_path = context.artifacts["config"].replace("\\", "/")
+        vocab_path = context.artifacts["vocab"].replace("\\", "/")
+        state_dict_path = context.artifacts["state_dict"].replace("\\", "/")
+
+        with open(config_path, "r", encoding="utf-8") as f:
             self.config = json.load(f)
-        with open(context.artifacts["vocab"], "r", encoding="utf-8") as f:
+        with open(vocab_path, "r", encoding="utf-8") as f:
             self.vocab = json.load(f)
 
-        state_dict = torch.load(context.artifacts["state_dict"], map_location="cpu")
+        state_dict = torch.load(state_dict_path, map_location="cpu")
 
         self.pad_token = self.config.get("pad_token", "<PAD>")
         self.unk_token = self.config.get("unk_token", "<UNK>")

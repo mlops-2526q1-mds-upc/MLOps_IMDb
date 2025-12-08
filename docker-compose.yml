@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  # ==========================
+  # SPAM
+  # ==========================
+  spam-model-updater:
+    build:
+      context: .
+      dockerfile: deployment/spam/Dockerfile
+      target: spam-model-updater
+    image: spam-model-updater
+    container_name: spam-model-updater
+    environment:
+      SPAM_MODEL_DIR: /shared/models/spam_model_production
+      SPAM_MODEL_POLL_SECONDS: 60
+    volumes:
+      - spam-model-volume:/shared/models
+    restart: unless-stopped
+
+  spam-api:
+    build:
+      context: .
+      dockerfile: deployment/spam/Dockerfile
+      target: spam-api
+    image: spam-api
+    container_name: spam-api
+    environment:
+      SPAM_MODEL_URI: /shared/models/spam_model_production/spam_model
+    volumes:
+      - spam-model-volume:/shared/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      - spam-model-updater
+    restart: unless-stopped
+
+  # ==========================
+  # SENTIMENT
+  # ==========================
+  sentiment-model-updater:
+    build:
+      context: .
+      dockerfile: deployment/sentiment/Dockerfile
+      target: sentiment-model-updater
+    image: sentiment-model-updater
+    container_name: sentiment-model-updater
+    environment:
+      SENTIMENT_MODEL_DIR: /shared/models/sentiment_model_production
+      SENTIMENT_MODEL_POLL_SECONDS: 60
+    volumes:
+      - sentiment-model-volume:/shared/models
+    restart: unless-stopped
+
+  sentiment-api:
+    build:
+      context: .
+      dockerfile: deployment/sentiment/Dockerfile
+      target: sentiment-api
+    image: sentiment-api
+    container_name: sentiment-api
+    environment:
+      SENTIMENT_MODEL_URI: /shared/models/sentiment_model_production/sentiment_model
+    volumes:
+      - sentiment-model-volume:/shared/models
+    ports:
+      - "8001:8000"
+    depends_on:
+      - sentiment-model-updater
+    restart: unless-stopped
+
+volumes:
+  spam-model-volume:
+  sentiment-model-volume:

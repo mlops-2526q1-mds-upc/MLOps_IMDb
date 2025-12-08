@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import mlflow
 from mlflow.models import ModelSignature
 from mlflow.types import ColSpec, DataType, Schema
+import numpy as np
 from sklearn.metrics import (
     accuracy_score,
     confusion_matrix,
@@ -151,8 +152,16 @@ def main():
                     preds_list.append(preds.cpu())
                     labels_list.append(batch_labels.cpu())
 
-            y_pred = torch.cat(preds_list).numpy()
-            y_true = torch.cat(labels_list).numpy()
+            pred_tensor = torch.cat(preds_list).detach().cpu()
+            true_tensor = torch.cat(labels_list).detach().cpu()
+
+            try:
+                y_pred = pred_tensor.numpy()
+                y_true = true_tensor.numpy()
+            except RuntimeError:
+                y_pred = np.array(pred_tensor.tolist())
+                y_true = np.array(true_tensor.tolist())
+
             y_pred_cls = (y_pred > 0.5).astype(int)
 
             acc = accuracy_score(y_true, y_pred_cls)
