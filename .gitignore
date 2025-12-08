@@ -209,11 +209,6 @@ reports/codecarbon_emissions.csv
 
 *.pt
 
-statements/
+statement/
 
 .vscode/
-
-*.ptreports/*.bak
-reports/codecarbon_emissions.csv
-reports/figures/baseline_confusion_matrix.png
-reports/metrics.json

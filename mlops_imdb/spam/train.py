@@ -135,6 +135,9 @@ def main():
 
             epochs = train_cfg.get("epochs", 5)
             loss_history = []
+            best_accuracy = 0.0
+            best_epoch = 0
+            best_model_state = None
 
             mlflow.log_params(
                 {
@@ -174,9 +177,28 @@ def main():
                 accuracy = correct / total if total else 0.0
                 loss_history.append(avg_loss)
 
-                print(f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f}")
+                # Save best model checkpoint
+                if accuracy > best_accuracy:
+                    best_accuracy = accuracy
+                    best_epoch = epoch
+                    best_model_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+                    print(
+                        f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f} [NEW BEST]"
+                    )
+                else:
+                    print(f"[spam_train] Epoch {epoch} | Loss {avg_loss:.4f} | Acc {accuracy:.4f}")
+
                 mlflow.log_metric("train_loss", avg_loss, step=epoch)
                 mlflow.log_metric("train_accuracy", accuracy, step=epoch)
+
+            # Restore best model weights
+            if best_model_state is not None:
+                model.load_state_dict(best_model_state)
+                print(
+                    f"[spam_train] Restored best model from epoch {best_epoch} (Acc {best_accuracy:.4f})"
+                )
+                mlflow.log_metric("best_epoch", best_epoch)
+                mlflow.log_metric("best_accuracy", best_accuracy)
 
             os.makedirs(os.path.dirname(model_path), exist_ok=True)
             torch.save(

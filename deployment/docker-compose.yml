@@ -1,0 +1,134 @@
+
+x-app-image: &app-image
+  image: mlops-imdb:latest
+
+services:
+  spam-model-updater:
+    <<: *app-image
+    env_file:
+      - ../.env
+    environment:
+      SPAM_MODEL_DIR: /shared/models/spam_model_production
+      SPAM_MODEL_POLL_SECONDS: ${SPAM_MODEL_POLL_SECONDS:-60}
+    volumes:
+      - spam-models:/shared/models
+    networks:
+      - spam-net
+    restart: unless-stopped
+    command: ["python3", "mlops_imdb/spam/update_model_daemon.py"]
+
+  spam-api:
+    <<: *app-image
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    env_file:
+      - ../.env
+    environment:
+      SPAM_MODEL_URI: /shared/models/spam_model_production/spam_model
+    volumes:
+      - spam-models:/shared/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      - spam-model-updater
+    networks:
+      - spam-net
+    restart: unless-stopped
+    command: ["python", "mlops_imdb/spam/api.py"]
+
+  sentiment-model-updater:
+    <<: *app-image
+    env_file:
+      - ../.env
+    environment:
+      SENTIMENT_MODEL_DIR: /shared/models/sentiment_model_production
+      SENTIMENT_MODEL_POLL_SECONDS: ${SENTIMENT_MODEL_POLL_SECONDS:-60}
+    volumes:
+      - sentiment-models:/shared/models
+    networks:
+      - sentiment-net
+    restart: unless-stopped
+    command: ["python3", "mlops_imdb/modeling/update_model_daemon.py"]
+
+  sentiment-api:
+    <<: *app-image
+    env_file:
+      - ../.env
+    environment:
+      SENTIMENT_MODEL_URI: /shared/models/sentiment_model_production/sentiment_model
+    volumes:
+      - sentiment-models:/shared/models
+    ports:
+      - "8001:8000"
+    depends_on:
+      - sentiment-model-updater
+    networks:
+      - sentiment-net
+    restart: unless-stopped
+    command: ["python", "mlops_imdb/modeling/api.py"]
+
+  ui:
+    <<: *app-image
+    env_file:
+      - ../.env
+    environment:
+      SPAM_ENDPOINT: http://spam-api:8000/predict
+      SENTIMENT_ENDPOINT: http://sentiment-api:8000/predict
+    ports:
+      - "8501:8501"
+    depends_on:
+      - spam-api
+      - sentiment-api
+    networks:
+      - spam-net
+      - sentiment-net
+    command: streamlit run mlops_imdb/app.py --server.port=8501 --server.address=0.0.0.0
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      # Mount the Docker socket so Promtail can find container names
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the location of logs on the HOST machine
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # Mount the config file we created
+      - ./promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
+volumes:
+  spam-models:
+  sentiment-models:
+  grafana-data:
+
+networks:
+  spam-net:
+  sentiment-net:
+  monitoring:

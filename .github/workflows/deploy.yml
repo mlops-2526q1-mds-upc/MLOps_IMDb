@@ -21,5 +21,4 @@ jobs:
           script: |
             cd ~/MLOps_IMDb
             git pull origin main
-            docker compose build --no-cache
-            docker compose up -d
+            docker compose -f deployment/docker-compose.yml up --build -d

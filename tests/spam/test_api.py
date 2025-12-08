@@ -1,8 +1,8 @@
 """Tests for the spam prediction API endpoints."""
 
+from fastapi.testclient import TestClient
 import pandas as pd
 import pytest
-from fastapi.testclient import TestClient
 
 from mlops_imdb.spam import api as spam_api
 
@@ -22,7 +22,7 @@ class MockModel:
 def client(monkeypatch):
     """Create a test client with a mocked model."""
     monkeypatch.setattr(spam_api, "model", MockModel())
-    return TestClient(spam_api.app)
+    return TestClient(spam_api.public_app)
 
 
 class TestHealthEndpoint:
@@ -98,4 +98,3 @@ class TestPredictEndpoint:
         data = response.json()
         assert "probability" in data
         assert "label" in data
-

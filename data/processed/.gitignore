@@ -2,3 +2,5 @@
 /train_features.npz
 /imdb_test_clean.csv
 /imdb_train_clean.csv
+/imdb_test_features.npz
+/imdb_train_features.npz

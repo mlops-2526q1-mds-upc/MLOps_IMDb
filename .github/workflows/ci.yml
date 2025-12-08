@@ -37,12 +37,9 @@ jobs:
 
       - name: Install project dependencies
         run: |
-          PY_VERSION="$(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
-          if [ -f uv.lock ]; then
-            uv sync --frozen --python "$PY_VERSION"
-          else
-            uv sync --python "$PY_VERSION"
-          fi
+          uv venv
+          source .venv/bin/activate
+          uv pip install -e ".[dev,train]"
 
       - name: Check formatting
         run: uv run ruff format --check

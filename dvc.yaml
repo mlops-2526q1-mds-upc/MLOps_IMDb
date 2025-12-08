@@ -12,6 +12,38 @@ stages:
     outs:
     - data/processed/imdb_test_clean.csv
     - data/processed/imdb_train_clean.csv
+  features:
+    cmd: python mlops_imdb/features/build_features.py
+    deps:
+    - data/processed/imdb_test_clean.csv
+    - data/processed/imdb_train_clean.csv
+    - mlops_imdb/features/build_features.py
+    params:
+    - features
+    outs:
+    - data/processed/imdb_test_features.npz
+    - data/processed/imdb_train_features.npz
+    - models/tfidf_vectorizer.pkl
+  train:
+    cmd: python mlops_imdb/modeling/train.py
+    deps:
+    - data/processed/imdb_train_features.npz
+    - mlops_imdb/modeling/train.py
+    params:
+    - train
+    outs:
+    - models/model.pkl
+  eval:
+    cmd: python mlops_imdb/modeling/eval.py
+    deps:
+    - data/processed/imdb_test_features.npz
+    - models/model.pkl
+    - mlops_imdb/modeling/eval.py
+    params:
+    - eval
+    metrics:
+    - reports/metrics.json:
+        cache: false
   spam_prepare:
     cmd: python mlops_imdb/spam/prepare.py
     deps:

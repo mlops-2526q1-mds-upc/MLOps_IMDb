@@ -1,36 +1,18 @@
-"""Download and prepare spam dataset from HuggingFace datasets."""
+"""Download and prepare spam dataset from UCI repository."""
 
 import os
 from pathlib import Path
 
 import pandas as pd
-from datasets import load_dataset
 from sklearn.model_selection import train_test_split
 
 
 def download_spam_dataset():
-    """Download SMS spam dataset from HuggingFace and save as parquet files."""
+    """Download SMS spam dataset from UCI and save as parquet files."""
     
-    # Create output directory
-    output_dir = Path("data/raw")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    print("Downloading SMS spam dataset from HuggingFace...")
-    
-    # Load the SMS spam dataset from HuggingFace
-    # This is a popular SMS spam collection dataset
-    try:
-        dataset = load_dataset("sms_spam", split="train")
-    except Exception as e:
-        print(f"Failed to load from 'sms_spam', trying alternative...")
-        # Alternative: use a different spam dataset
-        try:
-            dataset = load_dataset("SetFit/sms_spam", split="train")
-        except Exception as e2:
-            print(f"Failed to load alternative dataset: {e2}")
-            # Fallback: create from UCI SMS Spam Collection format
-            print("Attempting to download from UCI format...")
-            return download_from_uci_format()
+    # Use UCI format directly to avoid dependency issues
+    print("Downloading SMS spam dataset from UCI repository...")
+    return download_from_uci_format()
     
     # Convert to pandas DataFrame
     df = dataset.to_pandas()
