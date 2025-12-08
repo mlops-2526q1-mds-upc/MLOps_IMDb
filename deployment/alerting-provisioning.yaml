@@ -1,0 +1,226 @@
+apiVersion: 1
+
+groups:
+  - name: mlops_imdb_monitoring
+    interval: 30s
+    orgId: 1
+    folder: MLOps Alerts
+    rules:
+      - uid: drift_detected_sentiment
+        title: Data Drift Detected - Sentiment API
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({event="drift_report", service=~".*sentiment-api.*", status="drift_detected"}[5m]) > 0'
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: Data drift detected in sentiment model inputs
+          description: Alibi-detect has detected data drift in the sentiment API. Check drift reports for details.
+        labels:
+          severity: warning
+          service: sentiment-api
+          component: drift_detection
+
+      - uid: low_confidence_sentiment
+        title: Low Confidence Prediction - Sentiment API
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({event="monitoring_alert", service=~".*sentiment-api.*"} |= "Low confidence prediction detected" [5m]) > 0'
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 30s
+        annotations:
+          summary: Low confidence prediction detected in sentiment API
+          description: "{{ $values.A.Value }} low confidence predictions detected in the last 5 minutes. Model may need retraining or data quality check."
+        labels:
+          severity: warning
+          service: sentiment-api
+          component: prediction_monitoring
+
+      - uid: low_confidence_spam
+        title: Low Confidence Prediction - Spam API
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({event="monitoring_alert", service=~".*spam-api.*"} |= "Low confidence prediction detected" [5m]) > 0'
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 30s
+        annotations:
+          summary: Low confidence prediction detected in spam API
+          description: "{{ $values.A.Value }} low confidence predictions detected in the last 5 minutes. Model may need retraining or data quality check."
+        labels:
+          severity: warning
+          service: spam-api
+          component: prediction_monitoring
+
+      - uid: very_low_pvalue_sentiment
+        title: Very Low P-Value (High Drift) - Sentiment API
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({event="drift_report", service=~".*sentiment-api.*", status="drift_detected"}[5m]) > 0'
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: Very low P-value indicates high drift in sentiment API
+          description: Drift detected with p-value below threshold (0.05). This indicates significant data distribution shift.
+        labels:
+          severity: critical
+          service: sentiment-api
+          component: drift_detection
+
+      - uid: multiple_drift_events_sentiment
+        title: Multiple Drift Events (High Frequency) - Sentiment API
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              expr: 'count_over_time({event="drift_report", service=~".*sentiment-api.*", status="drift_detected"}[10m]) > 3'
+              refId: A
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: High frequency of drift detection events in sentiment API
+          description: "{{ $values.A.Value }} drift events detected in the last 10 minutes. This may indicate significant data distribution shift."
+        labels:
+          severity: critical
+          service: sentiment-api
+          component: drift_detection
+
+  - name: Updater
+    interval: 1m
+    orgId: 1
+    folder: Alerts
+    rules:
+      - uid: bf6hfuszxtloge
+        title: Spam Model Updated
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: loki
+            model:
+              editorMode: code
+              expr: 'sum(count_over_time({container=~".*spam-model-updater.*"} |= "spam-api reloaded successfully" [1m]))'
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              queryType: instant
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: A new spam model was deployed!
+        isPaused: false
+
+      - uid: ff6hnrdlskw74c
+        title: Sentiment Model Updated
+        condition: C
+        data:
+          - refId: A
+            queryType: instant
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              editorMode: code
+              expr: 'sum(count_over_time({container=~".*sentiment-model-updater.*"} |= "sentiment-api reloaded successfully" [1m]))'
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              queryType: instant
+              refId: A
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: A new sentiment model was deployed!
+        isPaused: false
+

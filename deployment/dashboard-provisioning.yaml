@@ -1,0 +1,35 @@
+apiVersion: 1
+
+providers:
+  - name: 'Sentiment API Dashboards'
+    orgId: 1
+    folder: 'Sentiment API'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/sentiment
+      foldersFromFilesStructure: true
+
+  - name: 'Spam API Dashboards'
+    orgId: 1
+    folder: 'Spam API'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/spam
+      foldersFromFilesStructure: true
+
+  - name: 'API Models Dashboards'
+    orgId: 1
+    folder: 'API Models'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/api-models
+      foldersFromFilesStructure: true
