@@ -1,0 +1,47 @@
+steps:
+  # ---------- BUILD & PUSH APP IMAGE ----------
+
+  - name: gcr.io/cloud-builders/docker
+    id: Build mlops-imdb
+    args:
+      - build
+      - -t
+      - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:${COMMIT_SHA}
+      - -t
+      - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:latest
+      - -f
+      - deployment/Dockerfile
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push mlops-imdb commit
+    args:
+      - push
+      - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:${COMMIT_SHA}
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push mlops-imdb latest
+    args:
+      - push
+      - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:latest
+
+  # ---------- DEPLOY TO VM ----------
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy to VM
+    entrypoint: gcloud
+    args:
+      - compute
+      - ssh
+      - vasco@models-server          # <-- your VM user@instance-name
+      - --zone=us-central1-a    # <-- replace with your VM's zone
+      - --project=galvanized-yeti-479117-r1
+      - --command=cd ~/MLOps_IMDb/deployment && git pull origin main && docker compose pull && docker compose up -d
+      - --quiet
+
+images:
+  - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:${COMMIT_SHA}
+  - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

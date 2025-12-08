@@ -1,6 +1,5 @@
-
 x-app-image: &app-image
-  image: mlops-imdb:latest
+  image: europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:latest
 
 services:
   spam-model-updater:
@@ -19,9 +18,9 @@ services:
 
   spam-api:
     <<: *app-image
-    build:
-      context: ..
-      dockerfile: deployment/Dockerfile
+    # build:  # ❌ REMOVE this whole block – build happens in Cloud Build now
+    #   context: ..
+    #   dockerfile: deployment/Dockerfile
     env_file:
       - ../.env
     environment:
@@ -103,11 +102,8 @@ services:
   promtail:
     image: grafana/promtail:3.0.0
     volumes:
-      # Mount the Docker socket so Promtail can find container names
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Mount the location of logs on the HOST machine
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      # Mount the config file we created
       - ./promtail-config.yaml:/etc/promtail/config.yaml
     command: -config.file=/etc/promtail/config.yaml
     depends_on:
