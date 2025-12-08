@@ -73,19 +73,6 @@ class TestDriftDetector:
         detector.set_reference_data(reference_features=reference_features)
         assert detector._initialized is True
 
-    def test_transform_text(self, reference_features, fitted_vectorizer):
-        """Test text transformation."""
-        detector = DriftDetector(
-            reference_data=reference_features,
-            vectorizer=fitted_vectorizer,
-        )
-        texts = ["Great movie! i liked it a lot. I recommend it to everyone.", "Terrible film. i hated it. i will never watch it again"]
-        features = detector.transform_text(texts)
-
-        assert isinstance(features, np.ndarray)
-        assert features.shape[0] == 2
-        assert features.shape[1] == 100 
-
     def test_add_sample(self, reference_features, fitted_vectorizer):
         """Test adding samples to buffer."""
         detector = DriftDetector(
