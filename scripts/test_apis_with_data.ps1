@@ -1,7 +1,27 @@
 # Test APIs with real data from processed datasets
-# Usage: .\scripts\test_apis_with_data.ps1
+# Usage: .\scripts\test_apis_with_data.ps1 [-prod]
+#   -prod: Use production server (http://34.135.54.197) instead of localhost
+
+param(
+    [switch]$prod
+)
 
 $ErrorActionPreference = "Continue"
+
+# Set base URL based on -prod parameter
+if ($prod) {
+    $baseUrl = "http://34.135.54.197"
+    Write-Host "Using PRODUCTION server: $baseUrl" -ForegroundColor Magenta
+} else {
+    $baseUrl = "http://localhost"
+    Write-Host "Using LOCAL server: $baseUrl" -ForegroundColor Cyan
+}
+
+# API endpoints - properly construct URLs using string concatenation
+$sentimentApiUrl = $baseUrl + ":8001"
+$spamApiUrl = $baseUrl + ":8000"
+$sentimentInternalUrl = $baseUrl + ":9001"
+$spamInternalUrl = $baseUrl + ":9000"
 
 Write-Host "=== Testing Sentiment API with IMDb Test Data ===" -ForegroundColor Cyan
 
@@ -19,7 +39,7 @@ foreach ($sample in $imdbSamples) {
     
     try {
         $body = @{text = $text} | ConvertTo-Json -Compress -Depth 10
-        $response = Invoke-RestMethod -Uri "http://localhost:8001/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
+        $response = Invoke-RestMethod -Uri "$sentimentApiUrl/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
         
         $match = ($expectedLabel -eq $response.label)
         $sentimentResults += [PSCustomObject]@{
@@ -59,7 +79,7 @@ foreach ($sample in $spamSamples) {
     
     try {
         $body = @{text = $text} | ConvertTo-Json -Compress -Depth 10
-        $response = Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
+        $response = Invoke-RestMethod -Uri "$spamApiUrl/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
         
         $match = ($expectedLabel -eq $response.label)
         $spamResults += [PSCustomObject]@{
@@ -95,7 +115,7 @@ $sentimentFailed = 0
 foreach ($sample in $imdbMoreSamples) {
     try {
         $body = @{text = $sample.text} | ConvertTo-Json -Compress -Depth 10
-        $null = Invoke-RestMethod -Uri "http://localhost:8001/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
+        $null = Invoke-RestMethod -Uri "$sentimentApiUrl/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
         $sentimentCount++
         if ($sentimentCount % 10 -eq 0) {
             Write-Host "  Sentiment: $sentimentCount/60 predictions..." -ForegroundColor Gray
@@ -123,7 +143,7 @@ foreach ($sample in $spamMoreSamples) {
     try {
         $text = if ($sample.clean_text) { $sample.clean_text } else { $sample.text }
         $body = @{text = $text} | ConvertTo-Json -Compress -Depth 10
-        $null = Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
+        $null = Invoke-RestMethod -Uri "$spamApiUrl/predict" -Method Post -ContentType "application/json; charset=utf-8" -Body $body
         $spamCount++
         if ($spamCount % 10 -eq 0) {
             Write-Host "  Spam: $spamCount/60 predictions..." -ForegroundColor Gray
@@ -143,7 +163,7 @@ Write-Host "  Spam API: $spamCount successful, $spamFailed failed" -ForegroundCo
 Write-Host "`n=== Checking Monitoring Status ===" -ForegroundColor Cyan
 
 try {
-    $driftStatus = Invoke-RestMethod -Uri "http://localhost:9001/monitoring/drift"
+    $driftStatus = Invoke-RestMethod -Uri "$sentimentInternalUrl/monitoring/drift"
     Write-Host "`nDrift Status:" -ForegroundColor Yellow
     Write-Host "  Status: $($driftStatus.status)" -ForegroundColor $(if ($driftStatus.drift_detected) { "Red" } else { "Green" })
     Write-Host "  Sample Size: $($driftStatus.sample_size)" -ForegroundColor Gray
@@ -156,7 +176,7 @@ catch {
 }
 
 try {
-    $stats = Invoke-RestMethod -Uri "http://localhost:9001/monitoring/stats"
+    $stats = Invoke-RestMethod -Uri "$sentimentInternalUrl/monitoring/stats"
     Write-Host "`nSentiment Prediction Stats:" -ForegroundColor Yellow
     Write-Host "  Total Predictions: $($stats.total_predictions)" -ForegroundColor Gray
     Write-Host "  Positive: $($stats.positive_predictions), Negative: $($stats.negative_predictions)" -ForegroundColor Gray
@@ -167,7 +187,7 @@ catch {
 }
 
 try {
-    $spamStats = Invoke-RestMethod -Uri "http://localhost:9000/monitoring/stats"
+    $spamStats = Invoke-RestMethod -Uri "$spamInternalUrl/monitoring/stats"
     Write-Host "`nSpam Prediction Stats:" -ForegroundColor Yellow
     Write-Host "  Total Predictions: $($spamStats.total_predictions)" -ForegroundColor Gray
     Write-Host "  Positive: $($spamStats.positive_predictions), Negative: $($spamStats.negative_predictions)" -ForegroundColor Gray
