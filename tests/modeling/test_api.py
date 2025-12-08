@@ -25,7 +25,7 @@ class MockModel:
 def client(monkeypatch):
     """Create a test client with a mocked model."""
     monkeypatch.setattr(sentiment_api, "model", MockModel())
-    with TestClient(sentiment_api.app) as test_client:
+    with TestClient(sentiment_api.public_app) as test_client:
         yield test_client
 
 
