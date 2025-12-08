@@ -168,4 +168,3 @@ docker compose -f deployment/docker-compose.yml up --build -d
 ├── .pre-commit-config.yaml <- Pre-commit hooks configuration
 └── uv.lock               <- Locked dependency graph for reproducible builds
 ```
-
