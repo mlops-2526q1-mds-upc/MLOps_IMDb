@@ -9,7 +9,7 @@ services:
       - ../.env
     environment:
       SPAM_MODEL_DIR: /shared/models/spam_model_production
-      SPAM_MODEL_POLL_SECONDS: ${SPAM_MODEL_POLL_SECONDS:-300}
+      SPAM_MODEL_POLL_SECONDS: ${SPAM_MODEL_POLL_SECONDS:-60}
     volumes:
       - spam-models:/shared/models
     networks:
@@ -43,7 +43,7 @@ services:
       - ../.env
     environment:
       SENTIMENT_MODEL_DIR: /shared/models/sentiment_model_production
-      SENTIMENT_MODEL_POLL_SECONDS: ${SENTIMENT_MODEL_POLL_SECONDS:-300}
+      SENTIMENT_MODEL_POLL_SECONDS: ${SENTIMENT_MODEL_POLL_SECONDS:-60}
     volumes:
       - sentiment-models:/shared/models
     networks:

@@ -92,7 +92,7 @@ def predict(payload: PredictRequest):
         label = int(proba_val >= 0.5)
         sentiment = "positive" if label == 1 else "negative"
         logger.info(
-            "Predicted sentiment for input text: %s has sentiment: %s with probability: %f",
+            "Predicted sentiment for input text: '%s' has sentiment: %s with probability: %f",
             payload.text,
             sentiment,
             proba_val,

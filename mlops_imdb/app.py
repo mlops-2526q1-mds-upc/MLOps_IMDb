@@ -99,13 +99,84 @@ def display_spam_result(result: Dict[str, Any]) -> None:
         st.json(result)
 
 
+def extract_sentiment_result(result: Dict[str, Any]) -> Tuple[Optional[str], Optional[float]]:
+    """
+    Try to infer sentiment label (positive/negative) and probability from the API response.
+    The API is expected to return fields like {"probability": 0.7, "label": 1, "sentiment": "positive"}.
+    """
+
+    def normalize_sentiment(val: Any) -> Optional[str]:
+        """Convert different representations to 'positive' or 'negative'."""
+        if isinstance(val, list) and val:
+            val = val[0]
+        if isinstance(val, (int, float)):
+            return "positive" if float(val) >= 0.5 else "negative"
+        if isinstance(val, str):
+            lowered = val.lower()
+            if lowered in {"positive", "pos", "1", "true"}:
+                return "positive"
+            if lowered in {"negative", "neg", "0", "false"}:
+                return "negative"
+        return None
+
+    proba = result.get("probability") or result.get("proba") or result.get("score")
+    if isinstance(proba, dict) and proba:
+        if "positive" in proba:
+            proba = proba["positive"]
+        else:
+            proba = max(proba.values())
+    if isinstance(proba, list) and proba:
+        proba = proba[0]
+    if isinstance(proba, (int, float)):
+        if proba > 1.0:
+            proba = proba / 100.0
+    else:
+        proba = None
+
+    sentiment = normalize_sentiment(result.get("sentiment"))
+    if sentiment is None:
+        sentiment = normalize_sentiment(result.get("label"))
+    if sentiment is None and proba is not None:
+        sentiment = "positive" if proba >= 0.5 else "negative"
+
+    return sentiment, proba
+
+
+def display_sentiment_result(result: Dict[str, Any]) -> None:
+    sentiment, proba = extract_sentiment_result(result)
+
+    if sentiment is None and proba is None:
+        st.warning("The API returned a response, but I couldn't interpret it.")
+        st.json(result)
+        return
+
+    is_positive = sentiment == "positive"
+    emoji = "😊" if is_positive else "😞"
+
+    if proba is not None:
+        pct = max(min(proba, 1.0), 0.0) * 100
+        if is_positive:
+            st.success(f"{emoji} Sentiment: **POSITIVE** ({pct:.1f}% positive probability)")
+        else:
+            st.error(f"{emoji} Sentiment: **NEGATIVE** ({pct:.1f}% positive probability)")
+        st.progress(min(max(proba, 0.0), 1.0))
+    else:
+        if is_positive:
+            st.success(f"{emoji} Sentiment: **POSITIVE**")
+        else:
+            st.error(f"{emoji} Sentiment: **NEGATIVE**")
+
+    with st.expander("Raw API response"):
+        st.json(result)
+
+
 def main():
     st.set_page_config(page_title="Model UI - Spam & Sentiment", page_icon="🤖")
     st.title("🤖 Unified Model UI")
     st.write(
         "This interface lets you test two models:\n"
-        "- a **spam detector** (available now)\n"
-        "- a **sentiment classifier** (coming soon)"
+        "- a **spam detector**\n"
+        "- a **sentiment classifier**"
     )
 
     user_text = st.text_area("📝 Enter some text:", height=150)
@@ -139,7 +210,12 @@ def main():
             st.info("🚧 The sentiment service is not available yet (no endpoint configured).")
         else:
             result, error = call_model(SENTIMENT_ENDPOINT, user_text)
-            st.error(error) if error else st.json(result)
+            if error:
+                st.error(error)
+            elif result is None:
+                st.error("Empty response from the API.")
+            else:
+                display_sentiment_result(result)
 
 
 if __name__ == "__main__":

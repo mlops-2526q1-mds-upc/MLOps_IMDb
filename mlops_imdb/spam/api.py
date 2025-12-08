@@ -63,7 +63,7 @@ def predict(payload: PredictRequest):
         proba_val = float(proba[0]) if hasattr(proba, "__len__") else float(proba)
         label = int(proba_val >= 0.5)
         logger.info(
-            "Predicted spam for input text: %s was classified as %d with probability: %f",
+            "Predicted spam for input text: '%s' was classified as %d with probability: %f",
             payload.text,
             label,
             proba_val,
