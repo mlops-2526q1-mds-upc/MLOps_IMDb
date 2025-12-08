@@ -86,10 +86,49 @@ services:
     command: streamlit run mlops_imdb/app.py --server.port=8501 --server.address=0.0.0.0
     restart: unless-stopped
 
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      # Mount the Docker socket so Promtail can find container names
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the location of logs on the HOST machine
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      # Mount the config file we created
+      - ./promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+
 volumes:
   spam-models:
   sentiment-models:
+  grafana-data:
 
 networks:
   spam-net:
   sentiment-net:
+  monitoring:
