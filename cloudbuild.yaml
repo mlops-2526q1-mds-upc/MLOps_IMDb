@@ -41,3 +41,6 @@ steps:
 images:
   - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:${COMMIT_SHA}
   - europe-west1-docker.pkg.dev/galvanized-yeti-479117-r1/mlops-images/mlops-imdb:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
