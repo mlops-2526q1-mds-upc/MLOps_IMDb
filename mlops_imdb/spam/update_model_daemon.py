@@ -20,11 +20,12 @@ from mlops_imdb.spam.download_production_model import (
     save_local_metadata,
 )
 
-POLL_SECONDS = int(os.getenv("SPAM_MODEL_POLL_SECONDS", "300"))
+POLL_SECONDS = int(os.getenv("SPAM_MODEL_POLL_SECONDS", "60"))
 # The internal URL. Note the port 9000 (internal only).
 API_RELOAD_URL = os.getenv(
     "SPAM_API_RELOAD_URL", "http://spam-api:9000/reload"
 )  # the spam-api is the container name in the docker compose
+SPAM_MONITORING_BASE_URL = os.getenv("SPAM_MONITORING_BASE_URL", "http://spam-api:9000")
 
 logger = get_logger(__name__)
 
@@ -64,10 +65,49 @@ def notify_api_reload():
         logger.warning("Could not contact spam-api at %s. Error: %s", API_RELOAD_URL, e)
 
 
+def trigger_monitoring_checks():
+    """
+    Trigger hourly monitoring checks: stats and alerts.
+    Called every hour (60 minutes) to ensure monitoring data is collected.
+    Note: Spam API does not have drift detection.
+    """
+    try:
+        logger.info("Triggering hourly spam monitoring checks...")
+
+        # Get monitoring stats
+        try:
+            response = requests.get(f"{SPAM_MONITORING_BASE_URL}/monitoring/stats", timeout=30)
+            if response.status_code == 200:
+                stats = response.json()
+                logger.info(
+                    "Monitoring stats retrieved: %d total predictions",
+                    stats.get("total_predictions", 0),
+                )
+            else:
+                logger.warning("Stats check returned status %s", response.status_code)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Failed to get stats: %s", exc)
+
+        # Get monitoring alerts
+        try:
+            response = requests.get(f"{SPAM_MONITORING_BASE_URL}/monitoring/alerts", timeout=30)
+            if response.status_code == 200:
+                alerts = response.json()
+                logger.info("Retrieved %d monitoring alerts", len(alerts.get("alerts", [])))
+            else:
+                logger.warning("Alerts check returned status %s", response.status_code)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Failed to get alerts: %s", exc)
+
+    except Exception as exc:
+        logger.exception("Error during monitoring checks: %s", exc)
+
+
 def main():
     target_dir = Path(os.getenv("SPAM_MODEL_DIR", "models/spam_model_production")).expanduser()
     staging_dir = target_dir.parent / ".spam_model_staging"
 
+    count = 0
     while True:
         try:
             params = load_params()
@@ -81,32 +121,36 @@ def main():
             run = find_latest_production_eval_run(exp_id)
             if not run:
                 logger.info("No production-tagged spam_eval run found. Sleeping...")
-                time.sleep(POLL_SECONDS)
-                continue
+            else:
+                latest_start_ms = run.info.start_time
+                if not is_up_to_date(target_dir, latest_start_ms):
+                    # Clean staging and download there
+                    if staging_dir.exists():
+                        shutil.rmtree(staging_dir)
+                    staging_dir.mkdir(parents=True, exist_ok=True)
+                    download_model(run.info.run_id, str(staging_dir))
+                    save_local_metadata(staging_dir, run.info.run_id, run.info.start_time)
 
-            latest_start_ms = run.info.start_time
-            if is_up_to_date(target_dir, latest_start_ms):
-                logger.info("Local spam_model is up to date. Sleeping...")
-                time.sleep(POLL_SECONDS)
-                continue
-
-            # Clean staging and download there
-            if staging_dir.exists():
-                shutil.rmtree(staging_dir)
-            staging_dir.mkdir(parents=True, exist_ok=True)
-            download_model(run.info.run_id, str(staging_dir))
-            save_local_metadata(staging_dir, run.info.run_id, run.info.start_time)
-
-            # Atomic swap: remove old target and move staging into place
-            if target_dir.exists():
-                shutil.rmtree(target_dir)
-            staging_dir.rename(target_dir)
-            logger.info("Updated spam_model from run %s", run.info.run_id)
-
-            notify_api_reload()
+                    # Atomic swap: remove old target and move staging into place
+                    if target_dir.exists():
+                        shutil.rmtree(target_dir)
+                    staging_dir.rename(target_dir)
+                    logger.info("Updated spam_model from run %s", run.info.run_id)
+                    notify_api_reload()
+                else:
+                    logger.info("Local spam_model is up to date. Sleeping...")
 
         except Exception as exc:
             logger.exception("[updater] Error: %s", exc)
+
+        # Increment counter and trigger hourly monitoring checks
+        count += 1
+        if count >= 60:  # 60 minutes = 1 hour (when sleeping every 1 minute)
+            count = 0
+            trigger_monitoring_checks()
+            logger.info("Triggered hourly spam monitoring checks")
+        else:
+            logger.info("Count: %d/60 - Not triggering hourly spam monitoring checks yet", count)
 
         time.sleep(POLL_SECONDS)
 

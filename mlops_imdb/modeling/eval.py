@@ -9,6 +9,9 @@ import shutil
 import sys
 from tempfile import TemporaryDirectory
 
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 from codecarbon import EmissionsTracker
 import joblib
 import matplotlib.pyplot as plt
@@ -26,9 +29,6 @@ import yaml
 
 from mlops_imdb.config import configure_mlflow
 from mlops_imdb.modeling.mlflow_model import SentimentPyfuncModel
-
-if sys.platform == "win32":
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 def load_params(path: str = "params.yaml") -> dict:
@@ -156,6 +156,7 @@ def main():
                 mlflow.log_artifact(cm_png, artifact_path="eval")
             except Exception:
                 pass
+
             vectorizer_path = features_out["vectorizer_path"]
             preprocess_cfg = params.get(
                 "preprocessing",

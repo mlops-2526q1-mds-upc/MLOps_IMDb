@@ -1,6 +1,8 @@
 # Data
 *.csv
 *.json
+!deployment/*.json
+
 *.parquet
 !/data/split_info.json
 !/data/.gitignore

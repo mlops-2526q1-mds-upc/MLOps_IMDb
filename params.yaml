@@ -77,6 +77,28 @@ energy:
     enabled: true
     output: reports/codecarbon_emissions.csv
 
+monitoring:
+  enabled: true
+  drift_detection:
+    enabled: true
+    p_threshold: 0.05
+    detector_type: ks 
+    min_samples: 50
+    window_size: 500
+    sample_size: 1000
+  prediction_monitoring:
+    enabled: true
+    window_size: 1000
+    confidence_threshold: 0.6
+    positive_ratio_warning: 0.3
+    positive_ratio_critical: 0.2
+  alerting:
+    enabled: true
+    log_alerts: true
+  outputs:
+    drift_detector_path: models/drift_detector
+    prediction_monitor_path: models/prediction_monitor
+
 stages:
   prepare: true
   features: true

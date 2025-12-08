@@ -27,8 +27,11 @@ services:
       SPAM_MODEL_URI: /shared/models/spam_model_production/spam_model
     volumes:
       - spam-models:/shared/models
+      - ../models:/app/models:ro
+      - ../data/processed:/app/data/processed:ro
     ports:
       - "8000:8000"
+      - "9000:9000"
     depends_on:
       - spam-model-updater
     networks:
@@ -58,8 +61,11 @@ services:
       SENTIMENT_MODEL_URI: /shared/models/sentiment_model_production/sentiment_model
     volumes:
       - sentiment-models:/shared/models
+      - ../models:/app/models:ro
+      - ../data/processed:/app/data/processed:ro
     ports:
       - "8001:8000"
+      - "9001:9000"
     depends_on:
       - sentiment-model-updater
     networks:
@@ -114,6 +120,11 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./dashboard-provisioning.yaml:/etc/grafana/provisioning/dashboards/dashboard-provisioning.yaml
+      - ./grafana-dashboard-sentiment.json:/etc/grafana/provisioning/dashboards/sentiment/sentiment-dashboard.json
+      - ./grafana-dashboard-spam.json:/etc/grafana/provisioning/dashboards/spam/spam-dashboard.json
+      - ./dashboard-api-models.json:/etc/grafana/provisioning/dashboards/api-models/dashboard-api-models.json
+      - ./alerting-provisioning.yaml:/etc/grafana/provisioning/alerting/alerting-provisioning.yaml
     depends_on:
       - loki
     networks:
