@@ -145,7 +145,7 @@ def main():
 
         # Increment counter and trigger hourly monitoring checks
         count += 1
-        if count >= 60:  # 60 minutes = 1 hour (when sleeping every 1 minute)
+        if count >= 5:  # 60 minutes = 1 hour (when sleeping every 1 minute)
             count = 0
             trigger_monitoring_checks()
             logger.info("Triggered hourly spam monitoring checks")
