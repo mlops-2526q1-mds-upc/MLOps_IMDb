@@ -20,10 +20,13 @@ from mlops_imdb.modeling.download_production_model import (
     save_local_metadata,
 )
 
-POLL_SECONDS = int(os.getenv("SENTIMENT_MODEL_POLL_SECONDS", "300"))
+POLL_SECONDS = int(os.getenv("SENTIMENT_MODEL_POLL_SECONDS", "60"))
 API_RELOAD_URL = os.getenv(
     "SENTIMENT_API_RELOAD_URL", "http://sentiment-api:9000/reload"
 )  # sentiment-api is the container name in docker compose
+SENTIMENT_MONITORING_BASE_URL = os.getenv(
+    "SENTIMENT_MONITORING_BASE_URL", "http://sentiment-api:9000"
+)
 logger = get_logger(__name__)
 
 
@@ -60,12 +63,66 @@ def notify_api_reload():
         logger.warning("Could not contact sentiment-api at %s. Error: %s", API_RELOAD_URL, exc)
 
 
+def trigger_monitoring_checks():
+    """
+    Trigger hourly monitoring checks: drift detection, stats, and alerts.
+    Called every hour (60 minutes) to ensure monitoring data is collected.
+    """
+    try:
+        logger.info("Triggering hourly sentiment monitoring checks...")
+
+        # Check for drift
+        try:
+            response = requests.get(
+                f"{SENTIMENT_MONITORING_BASE_URL}/monitoring/drift", timeout=30
+            )
+            if response.status_code == 200:
+                logger.info("Drift check completed: %s", response.json().get("status", "unknown"))
+            else:
+                logger.warning("Drift check returned status %s", response.status_code)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Failed to check drift: %s", exc)
+
+        # Get monitoring stats
+        try:
+            response = requests.get(
+                f"{SENTIMENT_MONITORING_BASE_URL}/monitoring/stats", timeout=30
+            )
+            if response.status_code == 200:
+                stats = response.json()
+                logger.info(
+                    "Monitoring stats retrieved: %d total predictions",
+                    stats.get("total_predictions", 0),
+                )
+            else:
+                logger.warning("Stats check returned status %s", response.status_code)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Failed to get stats: %s", exc)
+
+        # Get monitoring alerts
+        try:
+            response = requests.get(
+                f"{SENTIMENT_MONITORING_BASE_URL}/monitoring/alerts", timeout=30
+            )
+            if response.status_code == 200:
+                alerts = response.json()
+                logger.info("Retrieved %d monitoring alerts", len(alerts.get("alerts", [])))
+            else:
+                logger.warning("Alerts check returned status %s", response.status_code)
+        except requests.exceptions.RequestException as exc:
+            logger.warning("Failed to get alerts: %s", exc)
+
+    except Exception as exc:
+        logger.exception("Error during monitoring checks: %s", exc)
+
+
 def main():
     target_dir = Path(
         os.getenv("SENTIMENT_MODEL_DIR", "models/sentiment_model_production")
     ).expanduser()
     staging_dir = target_dir.parent / ".sentiment_model_staging"
 
+    count = 0
     while True:
         try:
             params = load_params()
@@ -79,28 +136,36 @@ def main():
             run = find_latest_production_eval_run(exp_id)
             if not run:
                 logger.info("No production-tagged eval run found. Sleeping...")
-                time.sleep(POLL_SECONDS)
-                continue
+            else:
+                latest_start_ms = run.info.start_time
+                if not is_up_to_date(target_dir, latest_start_ms):
+                    if staging_dir.exists():
+                        shutil.rmtree(staging_dir)
+                    staging_dir.mkdir(parents=True, exist_ok=True)
+                    download_model(run.info.run_id, str(staging_dir))
+                    save_local_metadata(staging_dir, run.info.run_id, run.info.start_time)
 
-            latest_start_ms = run.info.start_time
-            if is_up_to_date(target_dir, latest_start_ms):
-                logger.info("Local sentiment_model is up to date. Sleeping...")
-                time.sleep(POLL_SECONDS)
-                continue
+                    if target_dir.exists():
+                        shutil.rmtree(target_dir)
+                    staging_dir.rename(target_dir)
+                    logger.info("Updated sentiment_model from run %s", run.info.run_id)
+                    notify_api_reload()
+                else:
+                    logger.info("Local sentiment_model is up to date. Sleeping...")
 
-            if staging_dir.exists():
-                shutil.rmtree(staging_dir)
-            staging_dir.mkdir(parents=True, exist_ok=True)
-            download_model(run.info.run_id, str(staging_dir))
-            save_local_metadata(staging_dir, run.info.run_id, run.info.start_time)
-
-            if target_dir.exists():
-                shutil.rmtree(target_dir)
-            staging_dir.rename(target_dir)
-            logger.info("Updated sentiment_model from run %s", run.info.run_id)
-            notify_api_reload()
         except Exception as exc:
             logger.exception("[sentiment_updater] Error: %s", exc)
+
+        # Increment counter and trigger hourly monitoring checks
+        count += 1
+        if count >= 60:  # 60 minutes = 1 hour (when sleeping every 1 minute)
+            count = 0
+            trigger_monitoring_checks()
+            logger.info("Triggered hourly sentiment monitoring checks")
+        else:
+            logger.info(
+                "Count: %d/60 - Not triggering hourly sentiment monitoring checks yet", count
+            )
 
         time.sleep(POLL_SECONDS)
 
